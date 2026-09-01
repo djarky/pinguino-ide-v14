@@ -1,5 +1,9 @@
-Pinguino IDE 13
+Pinguino IDE 14 (VibeCoding)
 ===============
+
+Disclamer:
+
+this repo was a upgraded with IA , i dont have any idea what`s changes it made it , only I did it "upgrade this for python3.14 and pyside6" 
 
 ### Install from source code ###
 ```shell
