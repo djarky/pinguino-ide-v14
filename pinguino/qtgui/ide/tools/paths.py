@@ -3,7 +3,7 @@
 
 #import os
 
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 
 ## Python3 compatibility
@@ -26,21 +26,21 @@ class Paths(object):
 
         self.load_paths()
 
-        self.connect(self.main.lineEdit_path_sdcc_bin, QtCore.SIGNAL("editingFinished()"), self.save_paths)
-        self.connect(self.main.lineEdit_path_gcc_bin, QtCore.SIGNAL("editingFinished()"), self.save_paths)
-        self.connect(self.main.lineEdit_path_xc8_bin, QtCore.SIGNAL("editingFinished()"), self.save_paths)
-        self.connect(self.main.lineEdit_path_8_libs, QtCore.SIGNAL("editingFinished()"), self.save_paths)
-        self.connect(self.main.lineEdit_path_32_libs, QtCore.SIGNAL("editingFinished()"), self.save_paths)
+        self.main.lineEdit_path_sdcc_bin.editingFinished.connect(self.save_paths)
+        self.main.lineEdit_path_gcc_bin.editingFinished.connect(self.save_paths)
+        self.main.lineEdit_path_xc8_bin.editingFinished.connect(self.save_paths)
+        self.main.lineEdit_path_8_libs.editingFinished.connect(self.save_paths)
+        self.main.lineEdit_path_32_libs.editingFinished.connect(self.save_paths)
 
-        self.connect(self.main.pushButton_dir_sdcc, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_sdcc_bin))
-        self.connect(self.main.pushButton_dir_gcc, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_gcc_bin))
-        self.connect(self.main.pushButton_dir_xc8, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_xc8_bin))
-        self.connect(self.main.pushButton_dir_8bit, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_8_libs))
-        self.connect(self.main.pushButton_dir_32bit, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_32_libs))
-        self.connect(self.main.pushButton_dir_libs, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_custom_libs))
-        self.connect(self.main.pushButton_dir_mplab, QtCore.SIGNAL("clicked()"), lambda :self.open_path_for(self.main.lineEdit_path_mplab))
+        self.main.pushButton_dir_sdcc.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_sdcc_bin))
+        self.main.pushButton_dir_gcc.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_gcc_bin))
+        self.main.pushButton_dir_xc8.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_xc8_bin))
+        self.main.pushButton_dir_8bit.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_8_libs))
+        self.main.pushButton_dir_32bit.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_32_libs))
+        self.main.pushButton_dir_libs.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_custom_libs))
+        self.main.pushButton_dir_mplab.clicked.connect(lambda :self.open_path_for(self.main.lineEdit_path_mplab))
 
-        self.connect(self.main.checkBox_paths_default, QtCore.SIGNAL("toggled(bool)"), self.set_default_values)
+        self.main.checkBox_paths_default.toggled.connect(self.set_default_values)
 
 
     #----------------------------------------------------------------------

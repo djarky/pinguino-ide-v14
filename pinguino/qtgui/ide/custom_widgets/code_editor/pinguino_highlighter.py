@@ -7,7 +7,7 @@
 #import os
 #from ConfigParser import RawConfigParser
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from .syntax import Autocompleter
 
@@ -28,31 +28,31 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         #namespaces = pickle.load(open(os.path.join(os.getenv("PINGUINO_USER_PATH"), "reserved.pickle"), "r"))
         #namespaces = filter(lambda s:not "." in s, namespaces["all"])
         #all_reservadas += namespaces
-        self.highlightingRules.append(("\\b("+"|".join(all_reservadas)+")\\b", reservadas))
+        self.highlightingRules.append((r"\b("+"|".join(all_reservadas)+r")\b", reservadas))
 
         dotFuntions = QtGui.QTextCharFormat()
         dotFuntions.setForeground(color("#0000ff"))
-        self.highlightingRules.append(("\\b[\D][\w]*\.[\D][\w]*", dotFuntions))
+        self.highlightingRules.append((r"\b[\D][\w]*\.[\D][\w]*", dotFuntions))
 
         decimal = QtGui.QTextCharFormat()
         decimal.setForeground(color("#ff0000"))
-        self.highlightingRules.append(("\\b[\d]+\\b", decimal))
+        self.highlightingRules.append((r"\b[\d]+\b", decimal))
 
         float_ = QtGui.QTextCharFormat()
         float_.setForeground(color("#ff0000"))
-        self.highlightingRules.append(("\\b[\d]+\.[\d]+\\b", float_))
+        self.highlightingRules.append((r"\b[\d]+\.[\d]+\b", float_))
 
         hexa = QtGui.QTextCharFormat()
         hexa.setForeground(color("#ff0000"))
-        self.highlightingRules.append(("\\b0[Xx][A-Fa-f\d]+\\b", hexa))
+        self.highlightingRules.append((r"\b0[Xx][A-Fa-f\d]+\b", hexa))
 
         operators = QtGui.QTextCharFormat()
         operators.setFontWeight(QtGui.QFont.Bold)
-        self.highlightingRules.append(("[()\[\]{}<>=\-\+\*\\%#!~&^,]", operators))
+        self.highlightingRules.append((r"[()\[\]{}<>=\-\+\*\\%#!~&^,]", operators))
 
         bin_ = QtGui.QTextCharFormat()
         bin_.setForeground(color("#ff0000"))
-        self.highlightingRules.append(("\\b0[Bb][01]+\\b", bin_))
+        self.highlightingRules.append((r"\b0[Bb][01]+\b", bin_))
 
         doubleQuotation = QtGui.QTextCharFormat()
         doubleQuotation.setForeground(color("#7f0000"))
@@ -73,18 +73,20 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         self.multiComment = QtGui.QTextCharFormat()
         self.multiComment.setForeground(color("#c81818"))
 
-        self.commentStartExpression = QtCore.QRegExp("/\\*")
-        self.commentEndExpression = QtCore.QRegExp("\\*/")
+        self.commentStartExpression = QtCore.QRegularExpression(r"/\*")
+        self.commentEndExpression = QtCore.QRegularExpression(r"\*/")
 
     #----------------------------------------------------------------------
     def highlightBlock(self, text):
         for pattern, format_ in self.highlightingRules:
-            expression = QtCore.QRegExp(pattern)
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
-                self.setFormat(index, length, format_)
-                index = expression.indexIn(text, index + length)
+            if isinstance(pattern, QtCore.QRegularExpression):
+                expression = pattern
+            else:
+                expression = QtCore.QRegularExpression(pattern)
+            iterator = expression.globalMatch(text)
+            while iterator.hasNext():
+                match = iterator.next()
+                self.setFormat(match.capturedStart(), match.capturedLength(), format_)
 
         #for pattern, format in self.highlightingRulesMatch:
             #expression = QtCore.QRegExp(pattern)
@@ -104,18 +106,31 @@ class Highlighter(QtGui.QSyntaxHighlighter):
     #----------------------------------------------------------------------
     def buildComment(self, start, end, format_, text):
         self.setCurrentBlockState(0)
-        startIndex = 0
+        startIndex = -1
         if self.previousBlockState() != 1:
-            startIndex = start.indexIn(text)
-        while startIndex >= 0:
-            endIndex = end.indexIn(text, startIndex)
-            if endIndex == -1:
+            match_start = start.match(text)
+            if match_start.hasMatch():
+                startIndex = match_start.capturedStart()
+        else:
+            startIndex = 0
+
+        while startIndex >= 0 and startIndex < len(text):
+            match_end = end.match(text, startIndex)
+            if not match_end.hasMatch():
                 self.setCurrentBlockState(1)
                 commentLength = len(text) - startIndex
+                self.setFormat(startIndex, commentLength, format_)
+                break
             else:
-                commentLength = endIndex - startIndex + end.matchedLength()
-            self.setFormat(startIndex, commentLength, format_)
-            startIndex = start.indexIn(text, startIndex + commentLength)
+                endIndex = match_end.capturedStart()
+                commentLength = endIndex - startIndex + match_end.capturedLength()
+                self.setFormat(startIndex, commentLength, format_)
+                # Find next comment start after the end of this comment block
+                match_start = start.match(text, startIndex + commentLength)
+                if match_start.hasMatch():
+                    startIndex = match_start.capturedStart()
+                else:
+                    startIndex = -1
 
     #----------------------------------------------------------------------
     def addWord(self, word, tipo):
@@ -124,8 +139,8 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         newWord.setForeground(color(*self.fontsTypes(tipo)[0][:3]))
         if self.fontsTypes(tipo)[1]: newWord.setFontWeight(QtGui.QFont.Bold)
         newWord.setFontItalic(self.fontsTypes(tipo)[2])
-        self.highlightingRules.insert(0, (QtCore.QRegExp(word), newWord))
+        self.highlightingRules.insert(0, (QtCore.QRegularExpression(word), newWord))
 
     #----------------------------------------------------------------------
     def removeWord(self, word):
-        self.highlightingRules.append((QtCore.QRegExp(word), QtGui.QTextCharFormat()))
+        self.highlightingRules.append((QtCore.QRegularExpression(word), QtGui.QTextCharFormat()))

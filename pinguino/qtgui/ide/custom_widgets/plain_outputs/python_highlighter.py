@@ -1,7 +1,7 @@
 #! /usr/bin/python
 #-*- coding: utf-8 -*-
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 MESSAGES = [
     ("CRITICAL", "#FF0000"),
@@ -79,17 +79,17 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         if python:
             operators = QtGui.QTextCharFormat()
             operators.setFontWeight(QtGui.QFont.Bold)
-            self.highlightingRules.append(("[()\[\]{}<>=\-\+\*\\%#!~&^,/]", operators))
+            self.highlightingRules.append((r"[()\[\]{}<>=\-\+\*\\%#!~&^,/]", operators))
 
             reserved = QtGui.QTextCharFormat()
             reserved.setForeground(color("#8ae234"))
             #self.highlightingRules.append(("\\b(None|False|True|def|class|for|while|pass|try|except|print|if)\\b", reserved))
-            self.highlightingRules.append(("\\b({})\\b".format(RESERVED_PYTHON), reserved))
+            self.highlightingRules.append((r"\b({})\b".format(RESERVED_PYTHON), reserved))
 
         if extra:
             start_command = QtGui.QTextCharFormat()
             start_command.setForeground(color("#729fcf"))
-            self.highlightingRules.append((extra[0].replace(".", "\."), start_command))
+            self.highlightingRules.append((extra[0].replace(".", r"\."), start_command))
 
         sdcc_error_01 = QtGui.QTextCharFormat()
         sdcc_error_01.setForeground(color("#ef292a"))
@@ -98,20 +98,19 @@ class Highlighter(QtGui.QSyntaxHighlighter):
         for msg, color_ in MESSAGES:
             debugger = QtGui.QTextCharFormat()
             debugger.setForeground(color(color_))
-            self.highlightingRules.append(("\[{}\] .*".format(msg), debugger))
+            self.highlightingRules.append((r"\[{}\] .*".format(msg), debugger))
 
         for msg, color_ in EXCEPTIONS:
             debugger = QtGui.QTextCharFormat()
             debugger.setForeground(color(color_))
-            self.highlightingRules.append(("\\b({})\\b".format(msg), debugger))
+            self.highlightingRules.append((r"\b({})\b".format(msg), debugger))
 
 
     #----------------------------------------------------------------------
     def highlightBlock(self, text):
         for pattern, format_ in self.highlightingRules:
-            expression = QtCore.QRegExp(pattern)
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
-                self.setFormat(index, length, format_)
-                index = expression.indexIn(text, index + length)
+            expression = QtCore.QRegularExpression(pattern)
+            iterator = expression.globalMatch(text)
+            while iterator.hasNext():
+                match = iterator.next()
+                self.setFormat(match.capturedStart(), match.capturedLength(), format_)

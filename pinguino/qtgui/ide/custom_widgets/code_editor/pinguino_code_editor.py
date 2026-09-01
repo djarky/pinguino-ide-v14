@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtWidgets import QWidget
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QWidget
 
 from ..code_editor.line_number import LineNumber
 from ..code_editor.editor import CustomTextEdit

@@ -4,7 +4,7 @@
 import os
 import codecs
 
-from PySide2 import QtGui
+from PySide6 import QtGui
 
 from .core_threads import UpdateAutocompleter
 from ..methods.decorators import Decorator
@@ -224,7 +224,7 @@ class TimedMethods(object):
             editor = self.get_current_editor()
             if not hasattr(editor, "text_edit"): return
             tc = editor.text_edit.textCursor()
-            tc.movePosition(tc.EndOfWord, tc.MoveAnchor)
+            tc.movePosition(QtGui.QTextCursor.EndOfWord, QtGui.QTextCursor.MoveAnchor)
             editor.text_edit.smart_under_selection(tc)
             selected = tc.selectedText()
             self.update_assistant(selected)

@@ -3,7 +3,7 @@
 
 import os
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 
 ########################################################################
@@ -199,7 +199,7 @@ class Dialogs(object):
 
         """)
 
-        reply = msg_box.exec_()
+        reply = msg_box.exec()
 
 
     #----------------------------------------------------------------------
@@ -228,7 +228,7 @@ class Dialogs(object):
 
         """)
 
-        reply = msg_box.exec_()
+        reply = msg_box.exec()
 
         if reply == 0: return True
         elif reply == 1: return False
@@ -270,7 +270,7 @@ class Dialogs(object):
 
         """)
 
-        reply = msg_box.exec_()
+        reply = msg_box.exec()
 
         if reply == 0: return True
         elif reply == 1: return False
@@ -294,7 +294,7 @@ class Dialogs(object):
     @classmethod
     def get_text(self, parent, name, default=""):
 
-        text, ok = QtGui.QInputDialog.getText(parent,
+        text, ok = QtWidgets.QInputDialog.getText(parent,
                 os.getenv("PINGUINO_NAME")+QtWidgets.QApplication.translate("Dialogs", " - Input text"),
                 name+":", QtWidgets.QLineEdit.Normal,
                 default)

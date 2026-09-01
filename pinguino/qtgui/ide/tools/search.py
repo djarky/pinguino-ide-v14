@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from ..methods.decorators import Decorator
 
@@ -12,15 +12,15 @@ class Search(object):
     #----------------------------------------------------------------------
     def __init__(self):
 
-        self.connect(self.main.actionSearch, QtCore.SIGNAL("triggered()"), lambda :self.set_tab_search("search"))
-        self.connect(self.main.actionSearch_and_replace, QtCore.SIGNAL("triggered()"), lambda :self.set_tab_search("replace"))
+        self.main.actionSearch.triggered.connect(lambda :self.set_tab_search("search"))
+        self.main.actionSearch_and_replace.triggered.connect(lambda :self.set_tab_search("replace"))
 
-        self.connect(self.main.pushButton_search_previous, QtCore.SIGNAL("clicked()"), self.search_previous)
-        self.connect(self.main.pushButton_search_next, QtCore.SIGNAL("clicked()"), self.search_next)
-        self.connect(self.main.pushButton_replace, QtCore.SIGNAL("clicked()"), self.replace)
-        self.connect(self.main.pushButton_replace_all, QtCore.SIGNAL("clicked()"), self.replaceall)
-        self.connect(self.main.lineEdit_search, QtCore.SIGNAL("textChanged(QString)"), self.search_instantaneous)
-        self.connect(self.main.lineEdit_replace, QtCore.SIGNAL("textChanged(QString)"), self.replace_instantaneous)
+        self.main.pushButton_search_previous.clicked.connect(self.search_previous)
+        self.main.pushButton_search_next.clicked.connect(self.search_next)
+        self.main.pushButton_replace.clicked.connect(self.replace)
+        self.main.pushButton_replace_all.clicked.connect(self.replaceall)
+        self.main.lineEdit_search.textChanged.connect(self.search_instantaneous)
+        self.main.lineEdit_replace.textChanged.connect(self.replace_instantaneous)
 
         self.main.pushButton_search_next.setIcon(QtGui.QIcon.fromTheme("go-down"))
         self.main.pushButton_search_previous.setIcon(QtGui.QIcon.fromTheme("go-top"))

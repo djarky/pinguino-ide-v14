@@ -7,7 +7,7 @@ import os
 import logging
 import traceback
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from .dialogs import Dialogs
 from ..child_windows.submit_bug import SubmitBug

@@ -1,7 +1,7 @@
 #! /usr/bin/python2
 #-*- coding: utf-8 -*-
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 import os
 import sys
@@ -69,27 +69,27 @@ class Project(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """"""
-        self.connect(self.main.actionAdd_existing_directory, QtCore.SIGNAL("triggered()"), self.select_existing_directory)
-        self.connect(self.main.actionNew_project, QtCore.SIGNAL("triggered()"), self.new_project)
-        self.connect(self.main.actionNew_library, QtCore.SIGNAL("triggered()"), self.__show_library_template__)
-        # self.connect(self.main.actionImport_library_project, QtCore.SIGNAL("triggered()"), self.import_library)
-        self.connect(self.main.pushButton_newproject, QtCore.SIGNAL("clicked()"), self.new_project)
-        self.connect(self.main.pushButton_openproject, QtCore.SIGNAL("clicked()"), self.open_project)
-        self.connect(self.main.pushButton_newlibrary, QtCore.SIGNAL("clicked()"), self.__show_library_template__)
-        self.connect(self.main.actionClose_project, QtCore.SIGNAL("triggered()"), self.close_project)
-        self.connect(self.main.actionSave_project, QtCore.SIGNAL("triggered()"), self.save_project)
-        self.connect(self.main.actionSave_project_as, QtCore.SIGNAL("triggered()"), self.save_project_as)
-        self.connect(self.main.actionAdd_current_file, QtCore.SIGNAL("triggered()"), self.add_current_file)
-        self.connect(self.main.actionOpen_project, QtCore.SIGNAL("triggered()"), self.open_project)
-        self.connect(self.main.actionAdd_existing_file, QtCore.SIGNAL("triggered()"), self.select_existing_file)
-        self.connect(self.main.treeWidget_projects, QtCore.SIGNAL("itemExpanded(QTreeWidgetItem*)"), self.expand_tree)
-        self.connect(self.main.treeWidget_projects, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*,int)"), self.open_from_tree)
+        self.main.actionAdd_existing_directory.triggered.connect(self.select_existing_directory)
+        self.main.actionNew_project.triggered.connect(self.new_project)
+        self.main.actionNew_library.triggered.connect(self.__show_library_template__)
+        # self.main.actionImport_library_project.triggered.connect(self.import_library)
+        self.main.pushButton_newproject.clicked.connect(self.new_project)
+        self.main.pushButton_openproject.clicked.connect(self.open_project)
+        self.main.pushButton_newlibrary.clicked.connect(self.__show_library_template__)
+        self.main.actionClose_project.triggered.connect(self.close_project)
+        self.main.actionSave_project.triggered.connect(self.save_project)
+        self.main.actionSave_project_as.triggered.connect(self.save_project_as)
+        self.main.actionAdd_current_file.triggered.connect(self.add_current_file)
+        self.main.actionOpen_project.triggered.connect(self.open_project)
+        self.main.actionAdd_existing_file.triggered.connect(self.select_existing_file)
+        self.main.treeWidget_projects.itemExpanded.connect(self.expand_tree)
+        self.main.treeWidget_projects.itemDoubleClicked.connect(self.open_from_tree)
 
-        self.connect(self.main.pushButton_compilelibrary, QtCore.SIGNAL("clicked()"), self.compile_library)
-        self.connect(self.main.pushButton_packagelibrary, QtCore.SIGNAL("clicked()"), self.package_library)
+        self.main.pushButton_compilelibrary.clicked.connect(self.compile_library)
+        self.main.pushButton_packagelibrary.clicked.connect(self.package_library)
 
-        self.connect(self.main.treeWidget_projects, QtCore.SIGNAL("itemChanged(QTreeWidgetItem*,int)"), self.update_check_status)
-        # self.connect(self.main.treeWidget_projects, QtCore.SIGNAL("itemClicked(QTreeWidgetItem*,int)"), self.update_check_status)
+        self.main.treeWidget_projects.itemChanged.connect(self.update_check_status)
+        # self.main.treeWidget_projects.itemClicked.connect(self.update_check_status)
 
 
     #----------------------------------------------------------------------
@@ -118,7 +118,7 @@ class Project(object):
         try:
             self.project_saved = True
             self.ConfigProject = RawConfigParser()
-            self.ConfigProject.readfp(open(filename, "r"))
+            self.ConfigProject.read_file(open(filename, "r"))
             self.ConfigProject.filename = filename
 
             os.environ["PINGUINO_PROJECT"] = self.ConfigProject.get("Main", "name")
@@ -645,7 +645,7 @@ class Project(object):
 
         """)
 
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
     # #----------------------------------------------------------------------
@@ -931,7 +931,7 @@ class Project(object):
 
         self.main.menuRecentProjects.clear()
         for file_ in self.recent_projects:
-            action = QtWidgets.QAction(self)
+            action = QtGui.QAction(self)
             filename = os.path.split(file_)[1]
 
             len_ = 40
@@ -943,7 +943,7 @@ class Project(object):
 
             if os.path.isfile(file_):
                 action.setText(filename+" ("+file_path+")")
-                self.connect(action, QtCore.SIGNAL("triggered()"), self.ide_menu_recent_event(file_))
+                action.triggered.connect(self.ide_menu_recent_event(file_))
                 action.ActionEvent = self.ide_menu_recent_event
 
                 self.main.menuRecentProjects.addAction(action)
@@ -1194,7 +1194,7 @@ PUBLIC u8 my_function(){{
     def get_library_version(self):
         """"""
         parse_lib = RawConfigParser()
-        parse_lib.readfp(open(os.path.join(self.get_library_path(), "PINGUINO"), "r"))
+        parse_lib.read_file(open(os.path.join(self.get_library_path(), "PINGUINO"), "r"))
         return parse_lib.get("PINGUINO", "version")
 
 
@@ -1314,7 +1314,7 @@ PUBLIC u8 my_function(){{
         """"""
         logging.debug("Loading library.")
         parce_pinguino = RawConfigParser()
-        parce_pinguino.readfp(open(filename, "r"))
+        parce_pinguino.read_file(open(filename, "r"))
 
         library_dir = os.path.dirname(filename)
         library_name = parce_pinguino.get("PINGUINO", "name")
@@ -1354,7 +1354,7 @@ PUBLIC u8 my_function(){{
                 libs.append("32bit")
 
         parse_lib = RawConfigParser()
-        parse_lib.readfp(open(os.path.join(self.get_library_path(), "PINGUINO"), "r"))
+        parse_lib.read_file(open(os.path.join(self.get_library_path(), "PINGUINO"), "r"))
         parse_lib.set("PINGUINO", "arch", ", ".join(set(libs)))
         self.ConfigProject.set("Main", "name", parse_lib.get("PINGUINO", "name"))
         # self.save_project(silent=False, default=False)

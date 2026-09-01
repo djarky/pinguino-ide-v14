@@ -49,7 +49,7 @@ class PinguinoParser(object):
     #----------------------------------------------------------------------
     def get_variables(self):
         """"""
-        regex_variables = "[\s]*(volatile|register|static|extern)*[\s]*(unsigned|signed)*[\s]*(" + "|".join(data_types) + ")+[\s]*( \* )*[\s]*([ \w\[\]=,.{}\"']*);"
+        regex_variables = r"[\s]*(volatile|register|static|extern)*[\s]*(unsigned|signed)*[\s]*(" + "|".join(data_types) + r")+[\s]*( \* )*[\s]*([ \w\[\]=,.{}\"']*);"
         # regex_variables = "[\s]*(volatile|register|static|extern)*[\s]*(unsigned|signed)*[\s]*(short|long)*[\s]*(" + "|".join(data_types) + ")[\s]*+([*])*([ \w\[\]=,.{}\"'\*]*);"
 
         variables = []
@@ -104,8 +104,8 @@ class PinguinoParser(object):
                     for arg in args:
                         this_variable = {}
                         this_variable["type"] = type_
-                        if re.match("(.*)(\[.*\])", arg):
-                            this_variable["name"] = re.match("(.*)(\[.*\])", arg).groups()[0]
+                        if re.match(r"(.*)(\[.*\])", arg):
+                            this_variable["name"] = re.match(r"(.*)(\[.*\])", arg).groups()[0]
                         else:
                             this_variable["name"] = arg
                         #this_variable["value"] = match.groups()[6]
@@ -120,7 +120,7 @@ class PinguinoParser(object):
     #----------------------------------------------------------------------
     def get_directives(self):
 
-        regex_directive = "[\s]*#(" + "|".join(preprocessor_commands)+ ")[\s]+<?[\s]*([\w.]*)[\s]*>?[\s]*([\S]*)"
+        regex_directive = r"[\s]*#(" + "|".join(preprocessor_commands)+ r")[\s]+<?[\s]*([\w.]*)[\s]*>?[\s]*([\S]*)"
 
         directives = []
 
@@ -151,7 +151,7 @@ class PinguinoParser(object):
     #----------------------------------------------------------------------
     def get_functions(self):
 
-        regex_function = "[\s]*(unsigned|signed|static|long|PUBLIC)*[\s]*(" + "|".join(data_types) + ")[\s]+(\*?)[\s]*([*\w]+)[\s]*\(([\w ,*.\[\]]*)\)[\s]*"
+        regex_function = r"[\s]*(unsigned|signed|static|long|PUBLIC)*[\s]*(" + "|".join(data_types) + r")[\s]+(\*?)[\s]*([*\w]+)[\s]*\(([\w ,*.\[\]]*)\)[\s]*"
         # regex_function = "[\s]*(unsigned|signed|long|PUBLIC)*[\s]*(" + "|".join(data_types) + ")[\s]*(\*?)[\s]*([*\w]+)[\s]*\(([\s\w ,*.\[\]]*)\)[\s]*"
         #regex_function_content = "[\s]*{}[\s]*\{[\s\S]*\}[\s]*
 

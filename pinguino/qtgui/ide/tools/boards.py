@@ -3,7 +3,7 @@
 
 import os
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 from collections import OrderedDict
 
 ########################################################################
@@ -29,24 +29,24 @@ class Boards(object):
         self.main.comboBox_optimization.addItems(self.OPTIMIZATION)
         self.init_groups()
 
-        self.connect(self.main.radioButton_mode_usb, QtCore.SIGNAL("clicked()"), self.update_config)
-        self.connect(self.main.radioButton_mode_icsp, QtCore.SIGNAL("clicked()"), self.update_config)
-        self.connect(self.main.radioButton_mode_bt, QtCore.SIGNAL("clicked()"), self.update_config)
+        self.main.radioButton_mode_usb.clicked.connect(self.update_config)
+        self.main.radioButton_mode_icsp.clicked.connect(self.update_config)
+        self.main.radioButton_mode_bt.clicked.connect(self.update_config)
 
-        self.connect(self.main.radioButton_compiler_sdcc, QtCore.SIGNAL("clicked()"), self.update_config)
-        self.connect(self.main.radioButton_compiler_xc8, QtCore.SIGNAL("clicked()"), self.update_config)
+        self.main.radioButton_compiler_sdcc.clicked.connect(self.update_config)
+        self.main.radioButton_compiler_xc8.clicked.connect(self.update_config)
 
-        self.connect(self.main.radioButton_arch_8, QtCore.SIGNAL("clicked()"), self.update_config)
-        self.connect(self.main.radioButton_arch_32, QtCore.SIGNAL("clicked()"), self.update_config)
+        self.main.radioButton_arch_8.clicked.connect(self.update_config)
+        self.main.radioButton_arch_32.clicked.connect(self.update_config)
 
-        self.connect(self.main.checkBox_mips16, QtCore.SIGNAL("clicked()"), self.save_config)
-        self.connect(self.main.spinBox_heapsize, QtCore.SIGNAL("valueChanged(QString)"), self.save_config)
-        self.connect(self.main.comboBox_optimization, QtCore.SIGNAL("currentIndexChanged(QString)"), self.save_config)
+        self.main.checkBox_mips16.clicked.connect(self.save_config)
+        self.main.spinBox_heapsize.valueChanged.connect(self.save_config)
+        self.main.comboBox_optimization.currentIndexChanged.connect(self.save_config)
 
 
 
-        # self.connect(self.main.radioButton_bootloader_v1_v2, QtCore.SIGNAL("clicked()"), self.update_config)
-        # self.connect(self.main.radioButton_bootloader_v4, QtCore.SIGNAL("clicked()"), self.update_config)
+        # self.main.radioButton_bootloader_v1_v2.clicked.connect(self.update_config)
+        # self.main.radioButton_bootloader_v4.clicked.connect(self.update_config)
 
         self.load_config()
 
@@ -162,7 +162,8 @@ class Boards(object):
 
         self.main.frame_advance.setVisible(not arch_8)
         self.save_config()
-        self.status_info.setText(self.get_status_board())
+        if hasattr(self, 'status_info'):
+            self.status_info.setText(self.get_status_board())
 
 
     #----------------------------------------------------------------------
@@ -202,7 +203,7 @@ class Boards(object):
             radio.setText(board.name)
             radio.setToolTip(board.proc)
             if name_checked == board.name: radio.setChecked(True)
-            self.connect(radio, QtCore.SIGNAL("clicked()"), self.set_board_name(board.name, "8"))
+            radio.clicked.connect(self.set_board_name(board.name, "8"))
             count += 1
 
 
@@ -223,6 +224,6 @@ class Boards(object):
             radio.setText(board.name)
             radio.setToolTip(board.proc)
             if name_checked == board.name: radio.setChecked(True)
-            self.connect(radio, QtCore.SIGNAL("clicked()"), self.set_board_name(board.name, "32"))
+            radio.clicked.connect(self.set_board_name(board.name, "32"))
             count += 1
 

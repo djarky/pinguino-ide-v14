@@ -5,8 +5,8 @@ import os
 import re
 import pickle
 
-from PySide2 import QtGui, QtCore, QtWidgets
-from PySide2.QtCore import QPoint
+from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6.QtCore import QPoint
 
 #from .autocompleter import PinguinoAutoCompleter
 from .autocomplete_icons import CompleteIcons
@@ -24,7 +24,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
 
         super(CustomTextEdit, self).__init__(parent)
 
-        self.setLineWrapMode(self.NoWrap)
+        self.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
 
         with open(os.path.join(os.getenv("PINGUINO_USER_PATH"), "reserved.pickle"), "rb") as file_reserved:
             self.helpers = pickle.load(file_reserved).get("helpers", {})
@@ -38,7 +38,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
             #self.completer.text_edit = self
             #self.mousePressEvent = self.mouseAction
             #self.completer.setFont(self.font())
-            #self.connect(self.completer, QtCore.SIGNAL("itemDoubleClicked(QListWidgetItem*)"), self.insertItem)
+            #self.completer.itemDoubleClicked.connect(self.insertItem)
             #self.completer.keyPressEvent = self.keyPressEvent_autocompleter
             #self.completer.setFont(self.font())
 
@@ -79,7 +79,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         self.completer.text_edit = self
         #self.mousePressEvent = self.mouseAction
         self.completer.setFont(self.font())
-        self.connect(self.completer, QtCore.SIGNAL("itemDoubleClicked(QListWidgetItem*)"), self.insertItem)
+        self.completer.itemDoubleClicked.connect(self.insertItem)
         self.completer.keyPressEvent = self.keyPressEvent_autocompleter
         self.completer.setFont(self.font())
 
@@ -106,7 +106,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
     def wheelEvent(self, event):
 
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.step_font_size(event.delta())
+            self.step_font_size(event.angleDelta().y())
         else:
             super(CustomTextEdit, self).wheelEvent(event)
 
@@ -168,9 +168,9 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         self.temp_helpers.update(self.completer.local_functions)
 
         pos = tc.position()
-        tc.movePosition(tc.EndOfLine, tc.KeepAnchor)
+        tc.movePosition(QtGui.QTextCursor.EndOfLine, QtGui.QTextCursor.KeepAnchor)
         at_right = tc.selectedText()
-        tc.setPosition(pos, tc.MoveAnchor)
+        tc.setPosition(pos, QtGui.QTextCursor.MoveAnchor)
 
         if completion in self.temp_helpers.keys() and not at_right:
             pos = tc.position()
@@ -187,7 +187,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
 
             select = self.temp_helpers[completion][(start_position + 2):end_position]
             tc.beginEditBlock()
-            self.moveCursor(tc.StartOfLine)
+            self.moveCursor(QtGui.QTextCursor.StartOfLine)
             self.find(select)
             tc.endEditBlock()
 
@@ -204,8 +204,8 @@ class CustomTextEdit(QtWidgets.QTextEdit):
 
             self.setTextCursor(tc)
 
-        elif re.match("(.+) +\[.+\]", str(completion)) != None:
-            ins = re.match("(.+) +\[.+\]", str(completion)).group(1)
+        elif re.match(r"(.+) +\[.+\]", str(completion)) != None:
+            ins = re.match(r"(.+) +\[.+\]", str(completion)).group(1)
             tc.insertText(ins)
 
         else:
@@ -236,9 +236,9 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         def accept(insert):
             selected = tc.selectedText()
             tc.insertText(key + selected + insert)
-            tc.movePosition(tc.Left, tc.MoveAnchor)
-            tc.setPosition(tc.position()-len(selected), tc.MoveAnchor)
-            tc.setPosition(tc.position()+len(selected), tc.KeepAnchor)
+            tc.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.MoveAnchor)
+            tc.setPosition(tc.position()-len(selected), QtGui.QTextCursor.MoveAnchor)
+            tc.setPosition(tc.position()+len(selected), QtGui.QTextCursor.KeepAnchor)
             return tc
 
         if key == "[":
@@ -342,7 +342,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Enter-1]:
             tc = self.textCursor()
             pos = tc.position()
-            tc.select(tc.LineUnderCursor)
+            tc.select(QtGui.QTextCursor.LineUnderCursor)
             line = tc.selectedText()
             comment = ""
             if line.isspace() or line == "":
@@ -367,15 +367,15 @@ class CustomTextEdit(QtWidgets.QTextEdit):
 
     def smart_under_selection(self, tc):
         #word like: cdc|
-        tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+        tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
 
         #word like: cdc.|
-        if tc.selectedText().startswith("."): tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+        if tc.selectedText().startswith("."): tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
 
         #word like: cdc.pri|
-        tc.movePosition(tc.WordLeft, tc.KeepAnchor)
-        if tc.selectedText().startswith("."): tc.movePosition(tc.WordLeft, tc.KeepAnchor)
-        else: tc.movePosition(tc.WordRight, tc.KeepAnchor)
+        tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
+        if tc.selectedText().startswith("."): tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
+        else: tc.movePosition(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.KeepAnchor)
 
 
     #----------------------------------------------------------------------
@@ -396,7 +396,7 @@ class CustomTextEdit(QtWidgets.QTextEdit):
             return
 
 
-        if re.match('^[\w.]+$', selected[-1]) is None:
+        if re.match(r'^[\w.]+$', selected[-1]) is None:
             self.completer.hide()
             return
 

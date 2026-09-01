@@ -5,7 +5,7 @@ import os
 import sys
 import re
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from ..methods.dialogs import Dialogs
 from ...frames.library_template import Ui_LibraryTemplate
@@ -29,13 +29,13 @@ class LibraryTemplate(QtWidgets.QDialog):
 
         self.lib_template.lineEdit_lib_author.setText(os.environ.get("USER", ""))
 
-        self.connect(self.lib_template.pushButton_accept, QtCore.SIGNAL("clicked()"), self.accept)
-        self.connect(self.lib_template.pushButton_cancel, QtCore.SIGNAL("clicked()"), self.close)
-        self.connect(self.lib_template.pushButton_lib_path, QtCore.SIGNAL("clicked()"), self.set_directory)
-        self.connect(self.lib_template.checkBox_lib32, QtCore.SIGNAL("clicked(bool)"), self.can_generate)
-        self.connect(self.lib_template.checkBox_lib8, QtCore.SIGNAL("clicked(bool)"), self.can_generate)
-        self.connect(self.lib_template.lineEdit_lib_name, QtCore.SIGNAL("textChanged(QString)"), self.can_generate)
-        self.connect(self.lib_template.lineEdit_lib_path, QtCore.SIGNAL("textChanged(QString)"), self.can_generate)
+        self.lib_template.pushButton_accept.clicked.connect(self.accept)
+        self.lib_template.pushButton_cancel.clicked.connect(self.close)
+        self.lib_template.pushButton_lib_path.clicked.connect(self.set_directory)
+        self.lib_template.checkBox_lib32.clicked.connect(self.can_generate)
+        self.lib_template.checkBox_lib8.clicked.connect(self.can_generate)
+        self.lib_template.lineEdit_lib_name.textChanged.connect(self.can_generate)
+        self.lib_template.lineEdit_lib_path.textChanged.connect(self.can_generate)
 
         self.center_on_screen()
 
@@ -43,7 +43,7 @@ class LibraryTemplate(QtWidgets.QDialog):
     #----------------------------------------------------------------------
     def center_on_screen(self):
 
-        screen = QtGui.QDesktopWidget().screenGeometry()
+        screen = QtWidgets.QApplication.primaryScreen().geometry()
         size = self.geometry()
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 

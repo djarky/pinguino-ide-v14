@@ -3,7 +3,7 @@
 
 import os
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from ...frames.insert_block import Ui_InsertBlock
 
@@ -24,9 +24,9 @@ class InsertBlock(QtWidgets.QDialog):
 
         self.graphical = KIT
 
-        self.connect(self.insert.lineEdit, QtCore.SIGNAL("textChanged(QString)"), self.update_blocks)
-        self.connect(self.insert.listWidget, QtCore.SIGNAL("itemActivated(QListWidgetItem*)"), self.insert_block)
-        #self.connect(self.insert.listWidget, QtCore.SIGNAL("itemEntered(QListWidgetItem*)"), self.insert_block)
+        self.insert.lineEdit.textChanged.connect(self.update_blocks)
+        self.insert.listWidget.itemActivated.connect(self.insert_block)
+        #self.insert.listWidget.itemEntered.connect(self.insert_block)
 
         self.insert.lineEdit.keyPressEvent = self.line_edit_key
         self.insert.listWidget.keyPressEvent = self.list_key
@@ -46,7 +46,7 @@ class InsertBlock(QtWidgets.QDialog):
     #----------------------------------------------------------------------
     def center_on_screen(self):
 
-        screen = QtGui.QDesktopWidget().screenGeometry()
+        screen = QtWidgets.QApplication.primaryScreen().geometry()
         size = self.geometry()
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 

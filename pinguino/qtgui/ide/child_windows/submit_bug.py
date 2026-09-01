@@ -5,20 +5,11 @@ import os
 import logging
 from datetime import datetime
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 import requests
 import json
 
-# Python3 compatibility
-if os.getenv("PINGUINO_PYTHON") == "3":
-    #Python3
-    #from urllib.request import urlopen
-    #from urllib.parse import urlencode
-    from configparser import RawConfigParser
-else:
-    #Python2
-    #from urllib import urlopen, urlencode
-    from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 
 from ...frames.submit_bug import Ui_SubmitBug
 from ..methods.dialogs import Dialogs
@@ -54,9 +45,9 @@ class SubmitBug(QtWidgets.QDialog):
         icon.addPixmap(QtGui.QPixmap(":/logo/art/windowIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
 
-        self.connect(self.submit.pushButton_submit, QtCore.SIGNAL("clicked()"), self.submit_now)
-        self.connect(self.submit.pushButton_cancel, QtCore.SIGNAL("clicked()"), self.close)
-        self.connect(self.submit.checkBox_show_this_dialog, QtCore.SIGNAL("clicked()"), self.update_submit_dialog)
+        self.submit.pushButton_submit.clicked.connect(self.submit_now)
+        self.submit.pushButton_cancel.clicked.connect(self.close)
+        self.submit.checkBox_show_this_dialog.clicked.connect(self.update_submit_dialog)
 
         self.setStyleSheet("""
         font-family: inherit;
@@ -69,7 +60,7 @@ class SubmitBug(QtWidgets.QDialog):
     #----------------------------------------------------------------------
     def center_on_screen(self):
 
-        screen = QtWidgets.QDesktopWidget().screenGeometry()
+        screen = QtWidgets.QApplication.primaryScreen().geometry()
         size = self.geometry()
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)
 
@@ -197,7 +188,7 @@ class SubmitBug(QtWidgets.QDialog):
 
         parser = RawConfigParser()
         filename = os.path.join(os.getenv("PINGUINO_USER_PATH"), "submit-auth")
-        parser.readfp(open(filename, "r"))
+        parser.read_file(open(filename, "r"))
 
         username = parser.get("AUTH", "username")
         password = parser.get("AUTH", "password")
@@ -240,7 +231,7 @@ def send_old_submits():
     for submit in submits:
         parser = RawConfigParser()
         filename = os.path.join(os.getenv("PINGUINO_USER_PATH"), submit)
-        parser.readfp(open(filename, "r"))
+        parser.read_file(open(filename, "r"))
 
         summary = parser.get("SUBMIT", "summary")
         details = parser.get("SUBMIT", "details")

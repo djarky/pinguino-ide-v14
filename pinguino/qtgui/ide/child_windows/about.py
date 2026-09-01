@@ -3,7 +3,7 @@
 
 import os
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from ...frames.about import Ui_About
 
@@ -30,12 +30,12 @@ class About(QtWidgets.QDialog):
         icon.addPixmap(QtGui.QPixmap(":/logo/art/windowIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
 
-        self.connect(self.about.pushButton_credits, QtCore.SIGNAL("clicked()"), lambda :self.about.stackedWidget.setCurrentIndex(1))
-        self.connect(self.about.pushButton_license, QtCore.SIGNAL("clicked()"), lambda :self.about.stackedWidget.setCurrentIndex(2))
-        self.connect(self.about.pushButton_about, QtCore.SIGNAL("clicked()"), lambda :self.about.stackedWidget.setCurrentIndex(0))
-        self.connect(self.about.pushButton_close, QtCore.SIGNAL("clicked()"), self.close)
-        self.connect(self.about.pushButton_close_2, QtCore.SIGNAL("clicked()"), self.close)
-        self.connect(self.about.pushButton_close_3, QtCore.SIGNAL("clicked()"), self.close)
+        self.about.pushButton_credits.clicked.connect(lambda :self.about.stackedWidget.setCurrentIndex(1))
+        self.about.pushButton_license.clicked.connect(lambda :self.about.stackedWidget.setCurrentIndex(2))
+        self.about.pushButton_about.clicked.connect(lambda :self.about.stackedWidget.setCurrentIndex(0))
+        self.about.pushButton_close.clicked.connect(self.close)
+        self.about.pushButton_close_2.clicked.connect(self.close)
+        self.about.pushButton_close_3.clicked.connect(self.close)
 
         self.about.stackedWidget.setCurrentIndex(0)
         self.about.tabWidget.setCurrentIndex(0)
@@ -51,6 +51,6 @@ class About(QtWidgets.QDialog):
     #----------------------------------------------------------------------
     def center_on_screen(self):
 
-        screen = QtWidgets.QDesktopWidget().screenGeometry(-1)
+        screen = QtWidgets.QApplication.primaryScreen().geometry()
         size = self.geometry()
         self.move((screen.width()-size.width())/2, (screen.height()-size.height())/2)

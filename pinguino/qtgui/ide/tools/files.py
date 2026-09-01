@@ -5,7 +5,7 @@ import os
 from ..methods.dialogs import Dialogs
 from ..methods.decorators import Decorator
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 ########################################################################
 class Files(object):
@@ -13,9 +13,9 @@ class Files(object):
     #----------------------------------------------------------------------
     def __init__(self):
         """"""
-        self.connect(self.main.comboBox_files, QtCore.SIGNAL("currentIndexChanged(int)"), self.change_dir_files)
-        self.connect(self.main.treeWidget_explorer, QtCore.SIGNAL("itemExpanded(QTreeWidgetItem*)"), self.expand_tree)
-        self.connect(self.main.treeWidget_explorer, QtCore.SIGNAL("itemDoubleClicked(QTreeWidgetItem*,int)"), self.open_from_tree)
+        self.main.comboBox_files.currentIndexChanged.connect(self.change_dir_files)
+        self.main.treeWidget_explorer.itemExpanded.connect(self.expand_tree)
+        self.main.treeWidget_explorer.itemDoubleClicked.connect(self.open_from_tree)
 
 
     #----------------------------------------------------------------------

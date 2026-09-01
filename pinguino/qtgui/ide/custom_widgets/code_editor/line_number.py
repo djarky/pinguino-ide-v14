@@ -1,9 +1,9 @@
 #! /usr/bin/python
 #-*- coding: utf-8 -*-
 
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtWidgets import QWidget
-from PySide2.QtGui import QPainter
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QWidget
+from PySide6.QtGui import QPainter
 
 #from ..methods.backgrounds import BackgroundPallete
 
@@ -67,7 +67,7 @@ class LineNumber(QWidget):
                 font.setBold(True)
                 painter.setFont(font)
                 self.current = line_count
-            painter.drawText(self.width() - font_metrics.width(str(line_count)) - 10,
+            painter.drawText(self.width() - font_metrics.horizontalAdvance(str(line_count)) - 10,
                              round(position.y()) - contents_y + font_metrics.ascent(),
                              str(line_count))
             if bold:

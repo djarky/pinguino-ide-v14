@@ -10,7 +10,7 @@ from ..methods.decorators import Decorator
 
 from ...pinguino_core.pinguino_config import PinguinoConfig
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 # data_types = ["int", "float", "char", "double", "u8", "u16", "u32", "u64", "BOOL", "byte", "word", "void", "short", "long"]  # Yes I know, void is NOT a data type.
 # preprocessor_commands = ["define", "include", "error", "undef", "if", "else", "if", "elif", "ifdef", "ifndef", "line", "pragma"]  #endif
@@ -22,15 +22,15 @@ class SourceBrowser(object):
     #----------------------------------------------------------------------
     def __init__(self):
 
-        self.connect(self.main.tableWidget_functions, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.jump_function)
-        self.connect(self.main.tableWidget_directives, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.jump_directive)
-        self.connect(self.main.tableWidget_variables, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.jump_variable)
-        self.connect(self.main.tableWidget_functions.verticalHeader(), QtCore.SIGNAL("sectionClicked(int)"), self.jump_function)
-        self.connect(self.main.tableWidget_directives.verticalHeader(), QtCore.SIGNAL("sectionClicked(int)"), self.jump_directive)
-        self.connect(self.main.tableWidget_variables.verticalHeader(), QtCore.SIGNAL("sectionClicked(int)"), self.jump_variable)
+        self.main.tableWidget_functions.doubleClicked.connect(self.jump_function)
+        self.main.tableWidget_directives.doubleClicked.connect(self.jump_directive)
+        self.main.tableWidget_variables.doubleClicked.connect(self.jump_variable)
+        self.main.tableWidget_functions.verticalHeader().sectionClicked.connect(self.jump_function)
+        self.main.tableWidget_directives.verticalHeader().sectionClicked.connect(self.jump_directive)
+        self.main.tableWidget_variables.verticalHeader().sectionClicked.connect(self.jump_variable)
 
-        self.connect(self.main.label_library_edit, QtCore.SIGNAL("linkActivated(QString)"), self.open_file_from_link)
-        # self.connect(self.main.label_headers_edit, QtCore.SIGNAL("linkActivated(QString)"), self.open_file_from_link)
+        self.main.label_library_edit.linkActivated.connect(self.open_file_from_link)
+        # self.main.label_headers_edit.linkActivated.connect(self.open_file_from_link)
 
 
     #----------------------------------------------------------------------

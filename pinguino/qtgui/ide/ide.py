@@ -7,7 +7,7 @@ import platform
 import inspect
 import types
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from .commons.backgrounds import BackgroundPallete
 from .events import PinguinoEvents
@@ -35,7 +35,11 @@ class PinguinoIDE(QtWidgets.QMainWindow, PinguinoEvents, PythonShell, Log, Stdou
 
     #@Decorator.debug_time()
     def __init__(self, splash_write):
-        super(PinguinoIDE, self).__init__()
+        # Initialize only the Qt C++ base class first; the mixin chain
+        # (PinguinoEvents → PinguinoCore → Boards, etc.) requires
+        # self.main, self.pinguinoAPI and self.configIDE to be set, so
+        # we defer that initialisation until after those attributes exist.
+        QtWidgets.QMainWindow.__init__(self)
 
         os.environ["PINGUINO_PROJECT"] = ""
 
@@ -62,6 +66,11 @@ class PinguinoIDE(QtWidgets.QMainWindow, PinguinoEvents, PythonShell, Log, Stdou
 
         splash_write(QtWidgets.QApplication.translate("Splash", "Loading configuration"))
         self.configIDE = Config()
+
+        # Now that main, pinguinoAPI and configIDE are ready, initialise the
+        # mixin chain (Boards, Search, Files, SourceBrowser, Paths, etc.)
+        splash_write(QtWidgets.QApplication.translate("Splash", "Initializing components"))
+        PinguinoEvents.__init__(self)
 
         splash_write(QtWidgets.QApplication.translate("Splash", "Loading blocks programming"))
         self.PinguinoKIT = GraphicalIDE(self)

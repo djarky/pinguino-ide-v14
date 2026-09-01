@@ -9,7 +9,7 @@ import webbrowser
 import shutil
 from math import ceil
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 # import requests
 # from urllib import request
 # import urllib
@@ -493,10 +493,10 @@ class PinguinoSettings(object):
 
         dict_themes = {}
         for theme in valid_themes:
-            action = QtWidgets.QAction(self)
+            action = QtGui.QAction(self)
             action.setCheckable(True)
             action.setText(theme.capitalize().replace("-", " "))
-            self.connect(action, QtCore.SIGNAL("triggered()"), self.change_icon_theme(theme, action))
+            action.triggered.connect(self.change_icon_theme(theme, action))
             dict_themes[theme] = action
             self.main.menuIcons_theme.addAction(action)
 
@@ -682,7 +682,7 @@ class PinguinoSettings(object):
             # Invert current position and saved in position
             side = self.dockWidgetArea(self.main.dockWidget_right)
             position = {"RightDockWidgetArea": "LeftDockWidgetArea",
-                        "LeftDockWidgetArea": "RightDockWidgetArea",}[side.name.decode()]
+                        "LeftDockWidgetArea": "RightDockWidgetArea",}[side.name]
             self.configIDE.set("Main", "dock_tools", position)
 
         self.addDockWidget(QtCore.Qt.DockWidgetArea(getattr(QtCore.Qt, position)), self.main.dockWidget_right)
@@ -1298,7 +1298,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
 
         self.main.menuRecents.clear()
         for file_ in self.recent_files:
-            action = QtWidgets.QAction(self)
+            action = QtGui.QAction(self)
             filename = os.path.split(file_)[1]
 
             len_ = 40
@@ -1310,7 +1310,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
 
             if os.path.isfile(file_):
                 action.setText(filename+" ("+file_path+")")
-                self.connect(action, QtCore.SIGNAL("triggered()"), self.ide_menu_recent_event(file_))
+                action.triggered.connect(self.ide_menu_recent_event(file_))
                 action.ActionEvent = self.ide_menu_recent_event
 
                 self.main.menuRecents.addAction(action)
@@ -1390,17 +1390,20 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
         lib_paths = []
 
         # From core
-        for filename in os.listdir(core):
-            lib_paths.append((filename, core))
+        if os.path.exists(core):
+            for filename in os.listdir(core):
+                lib_paths.append((filename, core))
 
         # From libraries
-        for filename in os.listdir(libraries):
-            lib_paths.append((filename, libraries))
+        if os.path.exists(libraries):
+            for filename in os.listdir(libraries):
+                lib_paths.append((filename, libraries))
 
         # From user
         for path in PinguinoConfig.get_p8_libraries() + PinguinoConfig.get_p32_libraries():
-            for filename in os.listdir(path):
-                lib_paths.append((filename, path))
+            if os.path.exists(path):
+                for filename in os.listdir(path):
+                    lib_paths.append((filename, path))
 
         files = []
         for filename, path in lib_paths:
@@ -1696,7 +1699,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
         if highlighter:
             tc = editor.text_edit.textCursor()
             editor.text_edit.insert("file {snippet}")
-            tc.movePosition(tc.End)
+            tc.movePosition(QtGui.QTextCursor.End)
             tc.insertText("\n\n")
             editor.text_edit.setTextCursor(tc)
             editor.text_edit.insert("Bare minimum {snippet}")
@@ -1881,7 +1884,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
         font-weight: normal;
 
         """)
-        if preview.exec_():
+        if preview.exec():
             document = editor.text_edit.document()
             document.print_(printer)
 
@@ -2525,7 +2528,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
 
         """)
 
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
     #----------------------------------------------------------------------
@@ -2576,7 +2579,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
 
         """)
 
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
     #----------------------------------------------------------------------
@@ -2593,7 +2596,7 @@ class PinguinoCore(PinguinoComponents, PinguinoChilds, PinguinoQueries, Pinguino
         menu.addAction(self.main.actionLibraryManager)
         menu.addAction(self.main.actionTabSearchReplace)
         menu.addAction(self.main.actionTabBoardConfig)
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
     #----------------------------------------------------------------------

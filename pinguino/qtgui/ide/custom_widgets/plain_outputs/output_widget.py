@@ -5,7 +5,7 @@ import os
 import sys
 import pickle
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from .python_highlighter import Highlighter
 from .python_shell import PythonShell
@@ -26,7 +26,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
 
         self.shell = PythonShell()
 
-        self.setLineWrapMode(self.NoWrap)
+        self.setLineWrapMode(QtWidgets.QPlainTextEdit.LineWrapMode.NoWrap)
 
         if shell:
             self.appendPlainText(HEAD)
@@ -41,7 +41,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
             self.multiline_commands = []
 
         Highlighter(self.document(), extra=[START, NEW_LINE], python=shell)
-        # self.connect(self, QtCore.SIGNAL("textChanged(QString)"), self.textChanged)
+        # self.textChanged.connect(self.textChanged)
         self.setFrameShape(QtWidgets.QFrame.NoFrame)
 
 
@@ -161,7 +161,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
                 self.moveCursor(QtGui.QTextCursor.End)
 
                 tc = self.textCursor()
-                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
                 tc.removeSelectedText()
                 tc.insertText(START)
 
@@ -176,7 +176,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
                 self.moveCursor(QtGui.QTextCursor.End)
 
                 tc = self.textCursor()
-                tc.movePosition(tc.StartOfLine, tc.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
                 tc.removeSelectedText()
                 tc.insertText(START)
 
@@ -188,37 +188,37 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
 
         elif event.key() == QtCore.Qt.Key_Tab:
             tc = self.textCursor()
-            tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+            tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
             word = tc.selectedText()
             object_ = None
             attr_ = ""
 
-            tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+            tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
             n_word = tc.selectedText()
 
             if n_word == ".":
-                tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
                 object_ = tc.selectedText()
 
             if n_word.startswith("."):
-                tc.movePosition(tc.WordLeft, tc.KeepAnchor)
-                tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
                 if tc.selectedText().startswith("."):
                     while tc.selectedText().startswith("."):
-                        tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+                        tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
                 else:
-                    tc.movePosition(tc.WordRight, tc.KeepAnchor)
+                    tc.movePosition(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.KeepAnchor)
 
                 object_, attr_ = tc.selectedText().rsplit(".", 1)
 
 
             if n_word.endswith("."):
-                tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+                tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
                 if tc.selectedText().startswith("."):
                     while tc.selectedText().startswith("."):
-                        tc.movePosition(tc.WordLeft, tc.KeepAnchor)
+                        tc.movePosition(QtGui.QTextCursor.WordLeft, QtGui.QTextCursor.KeepAnchor)
                 else:
-                    tc.movePosition(tc.WordRight, tc.KeepAnchor)
+                    tc.movePosition(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.KeepAnchor)
 
                 object_, attr_ = tc.selectedText().rsplit(".", 1)
 
@@ -240,7 +240,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
             if common and word != common: options = [common]
 
             if len(options) > 1:
-                self.moveCursor(tc.StartOfLine)
+                self.moveCursor(QtGui.QTextCursor.StartOfLine)
                 i = 0
                 options = sorted(options)
                 for option in options:
@@ -250,28 +250,28 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
                         self.insertPlainText("{}\n".format(option))
                     else: self.insertPlainText("{}".format(option).ljust(50," "))
                 self.insertPlainText("\n\n")
-                self.moveCursor(tc.End)
+                self.moveCursor(QtGui.QTextCursor.End)
 
             elif len(options) == 1:
-                self.moveCursor(tc.End)
+                self.moveCursor(QtGui.QTextCursor.End)
 
                 if object_:
-                    tc.movePosition(tc.WordRight, tc.KeepAnchor)
+                    tc.movePosition(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.KeepAnchor)
                     while "." in tc.selectedText():
-                        tc.movePosition(tc.WordRight, tc.KeepAnchor)
+                        tc.movePosition(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.KeepAnchor)
                     tc.removeSelectedText()
 
                 elif word:
-                    tc.movePosition(tc.WordRight, tc.KeepAnchor)
+                    tc.movePosition(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.KeepAnchor)
                     tc.removeSelectedText()
 
                 self.insertPlainText(options[0])
-                self.moveCursor(tc.End)
+                self.moveCursor(QtGui.QTextCursor.End)
 
         elif event.key() == QtCore.Qt.Key_Home:
             super(PinguinoTextEdit, self).keyPressEvent(event)
             tc = self.textCursor()
-            self.moveCursor(tc.WordRight, tc.MoveAnchor)
+            self.moveCursor(QtGui.QTextCursor.WordRight, QtGui.QTextCursor.MoveAnchor)
 
         elif event.key() in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
             pass
@@ -290,7 +290,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
     #----------------------------------------------------------------------
     def wheelEvent(self, event):
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.step_font_size(event.delta())
+            self.step_font_size(event.angleDelta().y())
 
         else: super(PinguinoTextEdit, self).wheelEvent(event)
 
@@ -348,7 +348,7 @@ class PinguinoTextEdit(QtWidgets.QPlainTextEdit):
 
         """)
 
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
 

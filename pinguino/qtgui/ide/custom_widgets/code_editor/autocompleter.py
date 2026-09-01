@@ -4,8 +4,8 @@
 import pickle
 import os
 
-from PySide2.QtWidgets import QListWidget, QListWidgetItem
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QListWidget, QListWidgetItem
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from .autocomplete_icons import CompleteIcons
 from ....pinguino_core.config import Config
@@ -136,7 +136,7 @@ class PinguinoAutoCompleter(QListWidget):
 
     #----------------------------------------------------------------------
     def ajustPos(self):
-        screen = QtWidgets.QDesktopWidget().screenGeometry()
+        screen = QtWidgets.QApplication.primaryScreen().geometry()
         size = self.geometry()
 
         cont = 0
@@ -169,12 +169,8 @@ class PinguinoAutoCompleter(QListWidget):
     #----------------------------------------------------------------------
     def addNewItem(self, name, icon=None):
 
-        if os.getenv("PINGUINO_PYTHON") == "2":
-            if not icon: icon = None
-            elif type(icon) in [str, unicode]: icon = getattr(self.icons, icon)
-        elif os.getenv("PINGUINO_PYTHON") == "3":
-            if not icon: icon = None
-            elif type(icon) == str: icon = getattr(self.icons, icon)
+        if not icon: icon = None
+        elif isinstance(icon, str): icon = getattr(self.icons, icon)
 
         if not name in self.itemsListName:
             item = QListWidgetItem()
@@ -232,12 +228,8 @@ class PinguinoAutoCompleter(QListWidget):
     #----------------------------------------------------------------------
     def addItemsCompleter(self, list_, icon=None):
 
-        if os.getenv("PINGUINO_PYTHON") == "2":
-            if not icon: icon = None
-            elif type(icon) in [str, unicode]: icon = getattr(self.icons, icon)
-        elif os.getenv("PINGUINO_PYTHON") == "3":
-            if not icon: icon = None
-            elif type(icon) == str: icon = getattr(self.icons, icon)
+        if not icon: icon = None
+        elif isinstance(icon, str): icon = getattr(self.icons, icon)
 
         for text in list_:
             if not text in self.itemsListName:
