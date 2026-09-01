@@ -3,7 +3,7 @@
 
 import sys
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 #from .linear import Linear
 from .linear.linear import Ui_Form as Linear
@@ -48,7 +48,7 @@ class Properties(object):
             if self.Tab == "Saved":
                 menu = QtWidgets.QMenu()
                 menu.addAction("Remove Block", self.menuRemoveSaved)
-                menu.exec_(event.globalPos())
+                menu.exec(event.globalPos())
 
             else: return
 
@@ -92,7 +92,7 @@ class Properties(object):
 
         """)
 
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
     ##----------------------------------------------------------------------

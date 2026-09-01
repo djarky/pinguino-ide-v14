@@ -4,7 +4,7 @@
 #import os
 #import sys
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from .widgets.label import Ui_Frame as Label
 from .widgets.control_spin import Ui_Frame as ControlSpin
