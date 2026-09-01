@@ -25,9 +25,9 @@ import sys
 import os
 import argparse
 
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtWidgets import QApplication, QSplashScreen
-from PySide2.QtGui import QPixmap
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtWidgets import QApplication, QSplashScreen
+from PySide6.QtGui import QPixmap
 
 #----------------------------------------------------------------------
 def build_argparse():
@@ -79,7 +79,7 @@ def main():
 
     #load intern dialogs translations
     qtTranslator = QtCore.QTranslator()
-    qtTranslator.load("qt_" + sys_locale, QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+    qtTranslator.load("qt_" + sys_locale, QtCore.QLibraryInfo.path(QtCore.QLibraryInfo.LibraryPath.TranslationsPath))
 
     #load translations files
     translations_path = os.path.join(os.getenv("PINGUINO_LIB"), "multilanguage")
@@ -133,7 +133,7 @@ def main():
     if not splash is None:
         splash.finish(frame)
 
-    app.exec_()
+    app.exec()
 
 
 if __name__ == "__main__":

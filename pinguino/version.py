@@ -44,22 +44,9 @@ else:
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 -------------------------------------------------------------------------"""
 
-import os, sys
+import os
 
-if sys.version_info >= (3, ):
-    #Python3
-    os.environ["PINGUINO_PYTHON"] = "3"
-else:
-    #Python2
-    os.environ["PINGUINO_PYTHON"] = "2"
-
-# Python3 compatibility
-if os.getenv("PINGUINO_PYTHON") == "3":
-    import imp
-    imp.reload(sys)
-else:
-    reload(sys)
-    sys.setdefaultencoding("utf-8")
+os.environ["PINGUINO_PYTHON"] = "3"
 
 os.environ["PINGUINO_NAME"] = NAME
 os.environ["PINGUINO_VERSION"] = VERSION

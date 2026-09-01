@@ -6,13 +6,7 @@ import sys
 from setuptools import setup
 from . import version
 
-# Python3 compatibility
-if os.getenv("PINGUINO_PYTHON") == "3":
-    #Python3
-    from configparser import RawConfigParser
-else:
-    #Python2
-    from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 
 
 from .qtgui.pinguino_core.pinguino_config import PinguinoConfig
@@ -30,7 +24,7 @@ class PinguinoLib:
         config_file = os.path.join(sys.path[0], "PINGUINO")
 
         self.PINGUINO = RawConfigParser()
-        self.PINGUINO.readfp(open(config_file, "r"))
+        self.PINGUINO.read_file(open(config_file, "r"))
         self.PINGUINO = dict(self.PINGUINO.items("PINGUINO"))
 
         self.BASE_DIR = sys.path[0]

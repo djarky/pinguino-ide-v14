@@ -199,7 +199,7 @@ if parser.board:
                     for line in content_hex: printb(line, BColors.Cyan),
                     printb("*" * 70 + "\n", BColors.Cyan)
 
-                print "OK"
+                print("OK")
         else:
             pinguino.__hex_file__ = filename[0]
 
