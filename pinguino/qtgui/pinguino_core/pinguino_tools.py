@@ -372,7 +372,9 @@ class PinguinoTools(Uploader):
             libdir = self.P32_DIR
 
         if include_default:
-            all_pdls.extend(map(lambda pdl:os.path.join(libdir, "pdl", pdl), os.listdir(os.path.join(libdir, "pdl"))))
+            pdl_path = os.path.join(libdir, "pdl")
+            if os.path.exists(pdl_path):
+                all_pdls.extend(map(lambda pdl:os.path.join(libdir, "pdl", pdl), os.listdir(pdl_path)))
 
         all_pdls = filter(lambda name:name.endswith(libext), all_pdls)
 
@@ -384,7 +386,7 @@ class PinguinoTools(Uploader):
             lines = lib_file.readlines()
             lib_file.close()
 
-            regex_pdl = "[\s]*([.\w]*)[\s]*([\w]*)[\s]*(#include[\w\s\.\<\>/]*)*(#define.*)*[\s]*"
+            regex_pdl = r"[\s]*([.\w]*)[\s]*([\w]*)[\s]*(#include[\w\s\.\<\>/]*)*(#define.*)*[\s]*"
 
             for line in lines:
                 line = line[:line.find('//')]  #ignore comments
@@ -674,7 +676,7 @@ class PinguinoTools(Uploader):
             libinstructions = self.get_regobject_libinstructions(self.get_board().arch)
 
         preprocessor_commands = ["if", "ifdef", "elif", "endif", "define", "include"]
-        regex_directive = "[\s]*#(" + "|".join(preprocessor_commands)+ ")[\s\S]*"
+        regex_directive = r"[\s]*#(" + "|".join(preprocessor_commands)+ r")[\s\S]*"
         defines = []
         keys = {}
         index = 0
@@ -691,7 +693,7 @@ class PinguinoTools(Uploader):
 
             for instruction in libinstructions:
                 if re.search(instruction["regex"], content[line]):
-                    content[line] = re.sub(instruction["regex"], '\g<1><PINGUINO_RESERVED:%d>\g<3>' % index, content[line])  #safe
+                    content[line] = re.sub(instruction["regex"], r'\g<1><PINGUINO_RESERVED:%d>\g<3>' % index, content[line])  #safe
                     #content[line] = content[line][1:-1] #truth
 
                     keys['<PINGUINO_RESERVED:%d>' % index] = instruction["c"]

@@ -81,7 +81,7 @@ class PinguinoConfig(object):
             os.environ["PINGUINO_OS_NAME"] = "windows"
 
         config_paths = RawConfigParser()
-        config_paths.readfp(open(os.path.join(os.getenv("PINGUINO_LIB"), "qtgui", "config", "pinguino.{PINGUINO_OS_NAME}.conf".format(**os.environ)), "r"))
+        config_paths.read_file(open(os.path.join(os.getenv("PINGUINO_LIB"), "qtgui", "config", "pinguino.{PINGUINO_OS_NAME}.conf".format(**os.environ)), "r"))
 
         #load path from paths.conf
         os.environ["PINGUINO_USER_PATH"] = os.path.expandvars(os.path.expanduser(config_paths.get("Paths", "user_path")))

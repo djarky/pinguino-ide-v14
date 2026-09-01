@@ -72,17 +72,17 @@ class uploaderICSP(baseUploader):
     PK2_NOP                 = 0x5A
     PK2_GET_VERSION         = 0x76
     PK2_GET_VERSION_MPLAB   = 0x41
-    PK2_SET_VDD_4(v)        = 0xA0, (uint8_t)((v)*2048+672), (uint8_t)(((v)*2048+672)/256), (uint8_t)((v)*36)
-    PK2_SET_VDD_PK3(v)      = 0xA0, (uint8_t)(v / 0.125F), (uint8_t)(v / 0.125F /256)
-    PK2_SET_VPP_4(v)        = 0xA1, 0x40, (uint8_t)((v)*18.61), (uint8_t)((v)*13)
-    PK2_SET_VPP_PK3(v)      = 0xA1, (uint8_t)(v / 0.125F), (uint8_t)(v / 0.125F /256)
+    # PK2_SET_VDD_4(v)        = 0xA0, (uint8_t)((v)*2048+672), (uint8_t)(((v)*2048+672)/256), (uint8_t)((v)*36)
+    # PK2_SET_VDD_PK3(v)      = 0xA0, (uint8_t)(v / 0.125F), (uint8_t)(v / 0.125F /256)
+    # PK2_SET_VPP_4(v)        = 0xA1, 0x40, (uint8_t)((v)*18.61), (uint8_t)((v)*13)
+    # PK2_SET_VPP_PK3(v)      = 0xA1, (uint8_t)(v / 0.125F), (uint8_t)(v / 0.125F /256)
     PK2_READ_STATUS         = 0xA2
     PK2_READ_VDD_VPP        = 0xA3
-    PK2_DOWNLOAD_SCRIPT(idx, len)    0xA4, (idx), (len)
-    PK2_RUN_SCRIPT(idx, cnt)    0xA5, (idx), (cnt)
-    PK2_EXEC_SCRIPT_2(len)  = 0xA6, (len)
+    # PK2_DOWNLOAD_SCRIPT(idx, len)    0xA4, (idx), (len)
+    # PK2_RUN_SCRIPT(idx, cnt)    0xA5, (idx), (cnt)
+    # PK2_EXEC_SCRIPT_2(len)  = 0xA6, (len)
     PK2_CLR_DLOAD_BUFF      = 0xA7
-    PK2_DOWNLOAD_DATA_2(len)  0xA8, (len)
+    # PK2_DOWNLOAD_DATA_2(len)  0xA8, (len)
     PK2_CLR_ULOAD_BUFF      = 0xA9
     PK2_UPLOAD_DATA         = 0xAA
     PK2_CLR_SCRIPT_BUFF     = 0xAB
@@ -114,33 +114,33 @@ class uploaderICSP(baseUploader):
     PK2_SCR_MCLR_GND_OFF    = 0xF6
     PK2_SCR_BUSY_LED_ON     = 0xF5
     PK2_SCR_BUSY_LED_OFF    = 0xF4
-    PK2_SCR_WRITE_BYTE_LITERAL(v)	0xF2, (v)
-    PK2_SCR_WRITE_BYTE_BUFFER	0xF1
-    PK2_SCR_READ_BYTE_BUFFER	0xF0
+    # PK2_SCR_WRITE_BYTE_LITERAL(v)	0xF2, (v)
+    # PK2_SCR_WRITE_BYTE_BUFFER	0xF1
+    # PK2_SCR_READ_BYTE_BUFFER	0xF0
     PK2_SCR_READ_BYTE       = 0xEF
-    PK2_SCR_WRITE_BITS_LITTERAL(b, v)	0xEE, (b), (v)
-    PK2_SCR_WRITE_BITS_BUFFER(v)	0xED, (v)
-    PK2_SCR_READ_BITS_BUFFER(v)		0xEC, (v)
-    PK2_SCR_READ_BITS(v)			0xEB, (v)
-    PK2_SCR_SET_ICSP_SPEED(us) 0xEA,(us)
-    PK2_SCR_SET_ICSP_DELAY_2(us) 0xEA,(us)
-    PK2_SCR_SET_PINS_2(dd, cd, dv, cv) 0xF3, (((cd)!=0) | (((dd)!=0)<<1) | (((cv)!=0)<<2) | (((dv)!=0)<<3))
+    # PK2_SCR_WRITE_BITS_LITTERAL(b, v)	0xEE, (b), (v)
+    # PK2_SCR_WRITE_BITS_BUFFER(v)	0xED, (v)
+    # PK2_SCR_READ_BITS_BUFFER(v)		0xEC, (v)
+    # PK2_SCR_READ_BITS(v)			0xEB, (v)
+    # PK2_SCR_SET_ICSP_SPEED(us) 0xEA,(us)
+    # PK2_SCR_SET_ICSP_DELAY_2(us) 0xEA,(us)
+    # PK2_SCR_SET_PINS_2(dd, cd, dv, cv) 0xF3, (((cd)!=0) | (((dd)!=0)<<1) | (((cv)!=0)<<2) | (((dv)!=0)<<3))
     PK2_SCR_GET_PINS        = 0xDC
-    PK2_SCR_LOOP_3(rel, cnt)    0xE9, rel, cnt
-    PK2_SCR_DELAY_2(sec)    ((sec)>0.0054528?0xE8:0xE7), (uint8_t)((sec)>0.0054528?(.999+(sec)/.00546):(.999+(sec)/.0000213))
+    # PK2_SCR_LOOP_3(rel, cnt)    0xE9, rel, cnt
+    # PK2_SCR_DELAY_2(sec)    ((sec)>0.0054528?0xE8:0xE7), (uint8_t)((sec)>0.0054528?(.999+(sec)/.00546):(.999+(sec)/.0000213))
     ### SPI commands
-    PK2_SCR_SET_AUX_2(ad, av)   0xCF, (((ad)!=0) | (((av)!=0)<<1))
-    PK2_SCR_SPI_SETUP_PINS_4    SCR_SET_PINS_2(1,0,0,0), SCR_SET_AUX_2(0,0)
+    # PK2_SCR_SET_AUX_2(ad, av)   0xCF, (((ad)!=0) | (((av)!=0)<<1))
+    # PK2_SCR_SPI_SETUP_PINS_4    SCR_SET_PINS_2(1,0,0,0), SCR_SET_AUX_2(0,0)
     PK2_SCR_SPI             = 0xC3
-    PK2_SCR_SPI_LIT_2(v)    = 0xC7, (v)
+    # PK2_SCR_SPI_LIT_2(v)    = 0xC7, (v)
     SPI_WR_BYTE_BUF         = 0xC6
     SPI_RD_BYTE_BUF         = 0xC5
-    PK2_SCR_SPI_RDWR_BYTE_LIT(v)	0xC4, (v)
+    # PK2_SCR_SPI_RDWR_BYTE_LIT(v)	0xC4, (v)
     PK2_SCR_SPI_RDWR_BYTE_BUF   = 0xC3
     ### I2C commands
     PK2_SCR_I2C_START           = 0xCD
     PK2_SCR_I2C_STOP            = 0xCC
-    PK2_SCR_I2C_WR_BYTE_LIT(v)  = 0xCB, (v)
+    # PK2_SCR_I2C_WR_BYTE_LIT(v)  = 0xCB, (v)
     PK2_SCR_I2C_WR_BYTE_BUF     = 0xCA
     PK2_SCR_I2C_RD_BYTE_ACK     = 0xC9
     PK2_SCR_I2C_RD_BYTE_NACK    = 0xC8

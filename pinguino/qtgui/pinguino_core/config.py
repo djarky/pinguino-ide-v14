@@ -63,16 +63,16 @@ class Config(RawConfigParser, object):
         value = self.get(section, option)
         if type(value) != type(""): return value
 
-        if re.match("([-\d]+)$", value):
+        if re.match(r"([-\d]+)$", value):
             return int(value)
 
-        if re.match("([.\d*e-]+)$", value):
+        if re.match(r"([.\d*e-]+)$", value):
             return float(value)
 
-        elif re.match("(true)$", value.lower()):
+        elif re.match(r"(true)$", value.lower()):
             return True
 
-        elif re.match("(false)$", value.lower()):
+        elif re.match(r"(false)$", value.lower()):
             return False
 
         else: return value
@@ -143,7 +143,7 @@ class Config(RawConfigParser, object):
         """Read configuration from configuration file.
         """
 
-        self.readfp(open(self.ide_config_file, "r"))
+        self.read_file(open(self.ide_config_file, "r"))
 
 
     #----------------------------------------------------------------------
@@ -166,10 +166,12 @@ class Config(RawConfigParser, object):
         paths = self.config("Features", "pathstouse", "Paths")
 
         if self.has_option(paths, name):
+            raw_path = self.get(paths, name)
+            expanded_path = os.path.expanduser(os.path.expandvars(raw_path))
             if prefix:
-                return os.path.normpath(os.path.join(prefix, self.get(paths, name)[1:]))
+                return os.path.normpath(os.path.join(prefix, expanded_path[1:]))
             else:
-                return os.path.normpath(self.get(paths, name))
+                return os.path.normpath(expanded_path)
         else:
             logging.warning("Missing '{}' for 'Paths' or 'PathsCustom' in config file: '{}'".format(name, self.ide_config_file))
             return ""
