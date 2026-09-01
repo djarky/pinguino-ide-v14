@@ -6,7 +6,7 @@ import os
 from math import sqrt
 from datetime import datetime
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from .blocks import Blocks, OPENHANDCURSOR, CLOSEHANDCURSOR
 #from .constant import INTRO_CODE
@@ -117,7 +117,7 @@ class WorkArea(QtWidgets.QWidget):
 
         """)
 
-        menu.exec_(event.globalPos())
+        menu.exec(event.globalPos())
 
 
 

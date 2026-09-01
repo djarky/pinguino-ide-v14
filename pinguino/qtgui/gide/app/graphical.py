@@ -6,19 +6,12 @@ import os
 import re
 import sys
 
-# Python3 compatibility
-if os.getenv("PINGUINO_PYTHON") == "3":
-    #Python3
-    from configparser import RawConfigParser
-    from io import StringIO
-else:
-    #Python2
-    from ConfigParser import RawConfigParser
-    from cStringIO import StringIO
+from configparser import RawConfigParser
+from io import StringIO
 
 import logging
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from .code2blocks import Code2Blocks
 from .blocks import Blocks, OPENHANDCURSOR
@@ -232,12 +225,10 @@ class GraphicalIDE(Code2Blocks):
         blocks_set = []
         file_parser = RawConfigParser()
 
-        if os.getenv("PINGUINO_PYTHON") == "2":
-            if type(filename) in [str, unicode]: file_parser.readfp(codecs.open(filename, "r", encoding="utf-8"))
-            else: file_parser = filename
-        elif os.getenv("PINGUINO_PYTHON") == "3":
-            if type(filename) == str: file_parser.readfp(codecs.open(filename, "r", encoding="utf-8"))
-            else: file_parser = filename
+        if isinstance(filename, str):
+            file_parser.read_file(codecs.open(filename, "r", encoding="utf-8"))
+        else:
+            file_parser = filename
 
         sections = file_parser.sections()
         for section in sections:
@@ -247,16 +238,10 @@ class GraphicalIDE(Code2Blocks):
                 file_parser.get(section, option)
                 value = file_parser.get(section, option)
 
-                if os.getenv("PINGUINO_PYTHON") == "2":
-                    if (type(value) in [str, unicode]) and (value[0] in ["[", "("]):
-                        block[option] = eval(file_parser.get(section, option))
-                    else:
-                        block[option] = file_parser.get(section, option)
-                elif os.getenv("PINGUINO_PYTHON") == "3":
-                    if (type(value) == str) and (value[0] in ["[", "("]):
-                        block[option] = eval(file_parser.get(section, option))
-                    else:
-                        block[option] = file_parser.get(section, option)
+                if isinstance(value, str) and (value[0] in ["[", "("]):
+                    block[option] = eval(file_parser.get(section, option))
+                else:
+                    block[option] = file_parser.get(section, option)
 
             blocks_set.append(block)
         return blocks_set
@@ -343,7 +328,7 @@ class GraphicalIDE(Code2Blocks):
             if not widget:
                 id_ = None
             else:
-                id_ = re.findall("[.]*0x[\dabcdefABCDEF]*[.]*", widget.__str__())[0]
+                id_ = re.findall(r"[.]*0x[\dabcdefABCDEF]*[.]*", widget.__str__())[0]
             ser.append(id_)
         return ser
 

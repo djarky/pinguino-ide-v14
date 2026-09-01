@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from PySide6 import QtGui, QtCore, QtWidgets
 
 from .blocks import Blocks, OPENHANDCURSOR, CLOSEHANDCURSOR
 from ..bloques import BlockLinear, BlockFunction, BlockNested, \
