@@ -7,7 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 class Ui_About(object):
     def setupUi(self, About):
@@ -58,7 +58,7 @@ class Ui_About(object):
         self.label_name = QtWidgets.QLabel(self.page)
         font = QtGui.QFont()
         font.setPointSize(23)
-        font.setWeight(75)
+        font.setWeight(QtGui.QFont.Weight.Bold)
         font.setBold(True)
         self.label_name.setFont(font)
         self.label_name.setText("Pinguino 11.0")
