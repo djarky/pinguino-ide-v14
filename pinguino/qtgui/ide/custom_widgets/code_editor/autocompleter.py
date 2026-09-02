@@ -8,26 +8,17 @@ from PySide6.QtWidgets import QListWidget, QListWidgetItem
 from PySide6 import QtCore, QtGui, QtWidgets
 
 from .autocomplete_icons import CompleteIcons
+from .syntax import Snippet, Helpers
 from ....pinguino_core.config import Config
 
 
 class PinguinoAutoCompleter(QListWidget):
-    """
-    Rules:
-
-    * Visible after 2 keys (self.setSpell(2))
-    * Don't show with nodifiers
-    * Don't show with backspace
-    * When no matchs autocompleter must be visible
-    * Autocompleter must hidding with space key
-
-
-
-    """
-
     #----------------------------------------------------------------------
-    def __init__(self):
-        super(PinguinoAutoCompleter, self).__init__(None)
+    def __init__(self, parent=None):
+        super(PinguinoAutoCompleter, self).__init__(parent)
+        self.text_edit = parent
+        self.snippet = Snippet
+        self.helper = Helpers
 
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint |
                             QtCore.Qt.WindowSystemMenuHint |
@@ -104,7 +95,8 @@ class PinguinoAutoCompleter(QListWidget):
     #----------------------------------------------------------------------
     def hide(self, *args):
         super(PinguinoAutoCompleter, self).hide(*args)
-        self.text_edit.setFocus()
+        if getattr(self, "text_edit", None):
+            self.text_edit.setFocus()
 
     #----------------------------------------------------------------------
     def show(self, *args):
@@ -115,7 +107,7 @@ class PinguinoAutoCompleter(QListWidget):
     #----------------------------------------------------------------------
     def focusOutEvent(self, event):
         self.hide()
-        QtGui.QListWidget.focusOutEvent(self, event)
+        super(PinguinoAutoCompleter, self).focusOutEvent(event)
 
     #----------------------------------------------------------------------
     def setEnabled(self, en):
@@ -242,7 +234,9 @@ class PinguinoAutoCompleter(QListWidget):
 
 
     #----------------------------------------------------------------------
-    def popup(self, pos, index=None):
+    def popup(self, pos=None, index=None):
+        if pos is None:
+            return self
 
         ###hide autocompleter after 3s
         ##hide_timer = QtCore.QTimer()

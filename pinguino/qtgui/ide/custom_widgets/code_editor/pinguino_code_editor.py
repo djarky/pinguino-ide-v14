@@ -47,6 +47,17 @@ class PinguinoCodeEditor(QWidget):
 
         self.line_number.setTextEdit(self.text_edit)
         self.text_edit.viewport().installEventFilter(self)
+        self.text_edit.apply_theme()
+
+    #----------------------------------------------------------------------
+    def update_theme(self, is_dark=False):
+        if not hasattr(self, "widget") or self.widget is None:
+            return
+        sep_color = "#333333" if is_dark else "#F0F0F0"
+        palette = QtGui.QPalette(self.widget.palette())
+        self.widget.setAutoFillBackground(True)
+        palette.setColor(QtGui.QPalette.Window, QtGui.QColor(sep_color))
+        self.widget.setPalette(palette)
 
 
     #----------------------------------------------------------------------

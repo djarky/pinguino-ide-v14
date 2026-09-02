@@ -555,6 +555,57 @@ class PinguinoSettings(object):
 
         self.configIDE.set("Main", "color_theme", pinguino_color)
         self.main.actionColor_theme.setChecked(pinguino_color)
+        self.update_editor_themes()
+
+    #----------------------------------------------------------------------
+    def update_editor_themes(self):
+        try:
+            count = self.main.tabWidget_files.count()
+            for i in range(count):
+                widget = self.main.tabWidget_files.widget(i)
+                if hasattr(widget, "text_edit") and hasattr(widget.text_edit, "apply_theme"):
+                    widget.text_edit.apply_theme()
+        except Exception:
+            pass
+
+        try:
+            from pinguino.qtgui.ide.custom_widgets.code_editor.editor import is_color_dark
+            bg_color = None
+            text_color = None
+            if self.configIDE.has_section("Styles"):
+                if self.configIDE.has_option("Styles", "editor_background_color"):
+                    val = self.configIDE.get("Styles", "editor_background_color")
+                    if val and val.lower() != "none":
+                        bg_color = val
+                if self.configIDE.has_option("Styles", "editor_text_color"):
+                    val = self.configIDE.get("Styles", "editor_text_color")
+                    if val and val.lower() != "none":
+                        text_color = val
+
+            if not bg_color:
+                bg_color = "#FFFFFF"
+
+            is_dark = is_color_dark(bg_color)
+            out_bg = bg_color if is_dark else "#FFFFFF"
+            out_fg = text_color if text_color else ("#D4D4D4" if is_dark else "#000000")
+            sel_bg = "#264F78" if is_dark else "#57AAFF"
+            sel_fg = "#FFFFFF"
+
+            panel_style = f"""
+                QPlainTextEdit {{
+                    background-color: {out_bg};
+                    color: {out_fg};
+                    selection-background-color: {sel_bg};
+                    selection-color: {sel_fg};
+                    font-family: mono;
+                    font-size: 10pt;
+                }}
+            """
+            for panel in ["plainTextEdit_stdout", "plainTextEdit_log", "plainTextEdit_output"]:
+                if hasattr(self.main, panel):
+                    getattr(self.main, panel).setStyleSheet(panel_style)
+        except Exception:
+            pass
 
 
     #----------------------------------------------------------------------

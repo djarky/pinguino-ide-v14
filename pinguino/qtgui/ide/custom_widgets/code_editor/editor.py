@@ -1,167 +1,149 @@
-#!/usr/bin/env python
+#! /usr/bin/python
 #-*- coding: utf-8 -*-
 
 import os
 import re
-import pickle
 
-from PySide6 import QtGui, QtCore, QtWidgets
-from PySide6.QtCore import QPoint
+from PySide6 import QtCore, QtGui, QtWidgets
 
-#from .autocompleter import PinguinoAutoCompleter
-from .autocomplete_icons import CompleteIcons
+from .autocompleter import PinguinoAutoCompleter
 from .pinguino_highlighter import Highlighter
-from .syntax import Autocompleter, Snippet, Helpers
-#from ..methods import constants as Constants
-#from ..methods.decorators import Decorator
+from .line_number import LineNumber
+
+
+def is_color_dark(color):
+    qcol = QtGui.QColor(color)
+    if not qcol.isValid():
+        return False
+    luminance = (0.299 * qcol.red() + 0.587 * qcol.green() + 0.114 * qcol.blue())
+    return luminance < 128
 
 
 ########################################################################
-class CustomTextEdit(QtWidgets.QTextEdit):
+class CustomTextEdit(QtWidgets.QPlainTextEdit):
 
     #----------------------------------------------------------------------
-    def __init__(self, parent, linenumber, highlighter):
-
+    def __init__(self, parent=None, line_number=None, highlighter=None):
         super(CustomTextEdit, self).__init__(parent)
 
-        self.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
+        self.setLineWrapMode(QtWidgets.QPlainTextEdit.LineWrapMode.NoWrap)
 
-        with open(os.path.join(os.getenv("PINGUINO_USER_PATH"), "reserved.pickle"), "rb") as file_reserved:
-            self.helpers = pickle.load(file_reserved).get("helpers", {})
+        self.last_saved = ""
+        self.path = None
+        self.helpers = {}
+        self.next_ignore = None
 
-        self.cursorC = QtGui.QCursor()
-        self.linenumber = linenumber
+        self.completer = PinguinoAutoCompleter(self)
+        if highlighter is False:
+            self.highlighter = None
+        elif isinstance(highlighter, Highlighter):
+            self.highlighter = highlighter
+        else:
+            self.highlighter = Highlighter(self.document())
 
-        #if autocompleter:
-            #self.setau
-            #self.completer = PinguinoAutoCompleter()
-            #self.completer.text_edit = self
-            #self.mousePressEvent = self.mouseAction
-            #self.completer.setFont(self.font())
-            #self.completer.itemDoubleClicked.connect(self.insertItem)
-            #self.completer.keyPressEvent = self.keyPressEvent_autocompleter
-            #self.completer.setFont(self.font())
+        self.line_number = line_number if line_number is not None else LineNumber(self)
+        self.line_number.setTextEdit(self)
 
-            #icons = CompleteIcons()
-            #self.completer.addItemsCompleter(Autocompleter["directive"], icons.iconDirectives)
-            #self.completer.addItemsCompleter(Autocompleter["reserved"], icons.iconReserved)
-            #self.completer.addItemsCompleter(Snippet.keys(), icons.iconSnippet)
-            #self.last_w = ""
-            #self.next_ignore = None
+        self.updateRequest.connect(self.update_line_number)
+        self.cursorPositionChanged.connect(self.line_number.update)
 
-
-        if highlighter:
-            Highlighter(self.document())
-
-        self.setStyleSheet("""
-        QTextEdit {
-            background-color: #FFF;
-            font-family: mono;
-            font-weight: normal;
-            font-size: 10pt;
-            }
-        """)
-
+        self.apply_theme()
 
     #----------------------------------------------------------------------
-    def focusInEvent(self, event):
-        """"""
+    def apply_theme(self):
+        bg_color = None
+        text_color = None
+        try:
+            from pinguino.qtgui.pinguino_core.config import Config
+            config = Config()
+            if config.has_section("Styles"):
+                if config.has_option("Styles", "editor_background_color"):
+                    val = config.get("Styles", "editor_background_color")
+                    if val and val.lower() != "none":
+                        bg_color = val
+                if config.has_option("Styles", "editor_text_color"):
+                    val = config.get("Styles", "editor_text_color")
+                    if val and val.lower() != "none":
+                        text_color = val
+                if not bg_color and config.has_option("Styles", "background_color"):
+                    val = config.get("Styles", "background_color")
+                    if val and val.lower() != "none":
+                        bg_color = val
+        except Exception:
+            pass
 
-        super(CustomTextEdit, self).focusInEvent(event)
-        #self.cursorC.
+        if not bg_color:
+            bg_color = "#FFFFFF"
+
+        is_dark = is_color_dark(bg_color)
+        if not text_color:
+            text_color = "#D4D4D4" if is_dark else "#000000"
+
+        sel_bg = "#264F78" if is_dark else "#57AAFF"
+        sel_fg = "#FFFFFF"
+
+        self.setStyleSheet(f"""
+            QPlainTextEdit {{
+                background-color: {bg_color};
+                color: {text_color};
+                selection-background-color: {sel_bg};
+                selection-color: {sel_fg};
+            }}
+        """)
+
+        if self.highlighter and hasattr(self.highlighter, "set_theme"):
+            self.highlighter.set_theme(is_dark)
+
+        if self.line_number and hasattr(self.line_number, "set_theme"):
+            self.line_number.set_theme(is_dark, bg_color, text_color)
+
+        parent_editor = self.parent()
+        if parent_editor and hasattr(parent_editor, "update_theme"):
+            parent_editor.update_theme(is_dark)
 
 
     #----------------------------------------------------------------------
     def set_autocompleter(self, autocompleter):
-        """"""
-
-        self.completer = autocompleter
-        self.completer.text_edit = self
-        #self.mousePressEvent = self.mouseAction
-        self.completer.setFont(self.font())
-        self.completer.itemDoubleClicked.connect(self.insertItem)
-        self.completer.keyPressEvent = self.keyPressEvent_autocompleter
-        self.completer.setFont(self.font())
-
-        icons = CompleteIcons()
-        self.completer.addItemsCompleter(Autocompleter["directive"], icons.iconDirectives)
-        self.completer.addItemsCompleter(Autocompleter["reserved"], icons.iconReserved)
-        self.completer.addItemsCompleter(Snippet.keys(), icons.iconSnippet)
-        self.last_w = ""
-        self.next_ignore = None
+        if callable(autocompleter):
+            self.completer = autocompleter(self)
+        else:
+            self.completer = autocompleter
 
 
+    #----------------------------------------------------------------------
+    def update_line_number(self, rect, dy):
+        if dy:
+            self.line_number.scroll(0, dy)
+        else:
+            self.line_number.update(0, rect.y(), self.line_number.width(), rect.height())
 
 
-    ##----------------------------------------------------------------------
-    #def mouseAction(self, event):
-
-        #if self.underMouse():
-            #self.completer.hide()
-        ##QtGui.QTextEdit.mousePressEvent(self, event)
-        #super(CustomTextEdit, self).mousePressEvent(event)
+    #----------------------------------------------------------------------
+    def resizeEvent(self, event):
+        super(CustomTextEdit, self).resizeEvent(event)
+        cr = self.contentsRect()
+        self.line_number.setGeometry(QtCore.QRect(cr.left(), cr.top(), 51, cr.height()))
 
 
     #----------------------------------------------------------------------
     def wheelEvent(self, event):
-
         if event.modifiers() == QtCore.Qt.ControlModifier:
-            self.step_font_size(event.angleDelta().y())
+            delta = event.angleDelta().y()
+            if delta > 0:
+                self.zoomIn(1)
+            else:
+                self.zoomOut(1)
         else:
             super(CustomTextEdit, self).wheelEvent(event)
 
 
     #----------------------------------------------------------------------
-    def step_font_size(self, delta):
-
-        size = self.fontPointSize()
-        if size == 0:
-            size = 10
-
-        if delta > 0: size = size + 1
-        else: size = size - 1
-
-        if size <= 1:
-            size = 1
-
-        cursor = self.textCursor()
-        self.selectAll()
-        self.setFontPointSize(size)
-
-        font = self.linenumber.font()
-        font.setPointSize(size)
-        self.linenumber.setFont(font)
-
-        self.linenumber.setStyleSheet("""
-        font-family: mono;
-        font-weight: normal;
-        font-size: {}dpt;
-
-        """.format(size))
-
-        # cursor.clearSelection()
-        self.setTextCursor(cursor)
-
-
-
-    #----------------------------------------------------------------------
-    def insertItem(self, completion):
-
-        self.insert(completion.text())
-
-
-    #----------------------------------------------------------------------
-
     def insert(self, completion):
-        if not completion: return
-        #selected = completion
+
         tc = self.textCursor()
 
-        self.smart_under_selection(tc)
-
-        tc.removeSelectedText()
-
-        # if completion in Helpers.keys():
+        Snippet = self.completer.snippet
+        Helpers = self.completer.helper
 
         self.temp_helpers = self.helpers.copy()
         self.temp_helpers.update(Helpers)
@@ -195,149 +177,118 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         elif completion in Snippet.keys():
             pos = tc.position()
 
-            text_position = Snippet[completion].find("[!]")
-            text_insert = Snippet[completion].replace("[!]", "")
+            text_insert = Snippet[completion].replace("{{", "").replace("}}", "")
             position_in_line = tc.positionInBlock()
 
+            start_position = Snippet[completion].find("{{")
+            end_position = Snippet[completion].find("}}")
+
             tc.insertText(text_insert.replace("\n", "\n"+" "*position_in_line))
-            tc.setPosition(pos + text_position)
+            tc.setPosition(pos + start_position)
 
-            self.setTextCursor(tc)
-
-        elif re.match(r"(.+) +\[.+\]", str(completion)) != None:
-            ins = re.match(r"(.+) +\[.+\]", str(completion)).group(1)
-            tc.insertText(ins)
+            select = Snippet[completion][(start_position + 2):end_position]
+            tc.beginEditBlock()
+            self.moveCursor(QtGui.QTextCursor.StartOfLine)
+            self.find(select)
+            tc.endEditBlock()
 
         else:
             tc.insertText(completion)
 
-        self.completer.hide()
-        self.setFocus()
+        self.smart_under_selection(tc)
+        self.setTextCursor(tc)
 
 
     #----------------------------------------------------------------------
-
-    def getPosPopup(self):
-        pos = self.pos()
-        pos1 = self.mapToGlobal(pos)
-        pos2 = QPoint()
-        cRect = self.cursorRect()
-        pos2.setX(cRect.x())
-        pos2.setY(cRect.y())
-        return pos1 + pos2
+    def set_autocomplete(self, words):
+        self.completer.set_words(words)
 
 
     #----------------------------------------------------------------------
-
-    def autoInsert(self, event):
-        key = event.text()
-        tc = self.textCursor()
-
-        def accept(insert):
-            selected = tc.selectedText()
-            tc.insertText(key + selected + insert)
-            tc.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.MoveAnchor)
-            tc.setPosition(tc.position()-len(selected), QtGui.QTextCursor.MoveAnchor)
-            tc.setPosition(tc.position()+len(selected), QtGui.QTextCursor.KeepAnchor)
-            return tc
-
-        if key == "[":
-            self.next_ignore = "]"
-            return accept("]")
-
-        elif key == "{":
-            self.next_ignore = "}"
-            return accept("}")
-
-        elif key == '"':
-            self.next_ignore = '"'
-            return accept('"')
-
-        elif key == "'":
-            self.next_ignore = "'"
-            return accept("'")
-
-        elif key == "(":
-            self.next_ignore = ")"
-            return accept(")")
-        else: return False
+    def keyPressEvent(self, event):
+        self.__keyPressEvent__(event)
 
 
     #----------------------------------------------------------------------
-    def keyPressEvent_autocompleter(self, event):
-
-        #desplazar
-        if event.key() in (QtCore.Qt.Key_Up, QtCore.Qt.Key_Down) and self.completer.isVisible():
-            self.completer.setFocus()
-            if event.key() == QtCore.Qt.Key_Up: self.completer.up()
-            elif event.key() == QtCore.Qt.Key_Down: self.completer.down()
-            return
-
-        #insertar
-        elif event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Enter-1, QtCore.Qt.Key_Tab) and self.completer.isVisible():
-            self.insert(self.completer.currentItem().text())
-            self.completer.hide()
-            return
-
-        self.keyPressEvent(event)
-
-
-    #----------------------------------------------------------------------
-    def force_keyPressEvent(self, event):
-
-        super(CustomTextEdit, self).keyPressEvent(event)
-
-
-    #----------------------------------------------------------------------
-
     def __keyPressEvent__(self, event):
-        self.setFocus()
 
-        key_text = event.text()
-        if self.next_ignore == key_text:
-            self.next_ignore = None
-            return
+        key = event.text()
 
-        if not key_text:
-            self.completer.hide()
-            super(CustomTextEdit, self).keyPressEvent(event)
-            return
-
-
-        if event.key() in (
-            #QtCore.Qt.Key_Enter,
-            QtCore.Qt.Key_Escape,
-            QtCore.Qt.Key_Space,
-            QtCore.Qt.Key_Control,
-            QtCore.Qt.Key_Shift,
-            QtCore.Qt.Key_Alt,
-            QtCore.Qt.Key_Backtab,
-            QtCore.Qt.Key_Up,
-            QtCore.Qt.Key_Down,
-            QtCore.Qt.Key_Right,
-            QtCore.Qt.Key_Left,
-            QtCore.Qt.Key_Backspace,
-            QtCore.Qt.Key_CapsLock,
-            ) or event.modifiers() in (
-            QtCore.Qt.ControlModifier,
-            QtCore.Qt.AltModifier,
-            ):  # this is so sad!
-            self.completer.hide()
-            super(CustomTextEdit, self).keyPressEvent(event)
-            return
-
-
-        #Si el autocerrado está activado
-        ttcc = self.autoInsert(event)
-        if ttcc:
-            self.setTextCursor(ttcc)
-            return
+        if self.completer.popup().isVisible():
+            if event.key() in [QtCore.Qt.Key_Enter,
+                                QtCore.Qt.Key_Return,
+                                QtCore.Qt.Key_Escape,
+                                QtCore.Qt.Key_Tab,
+                                QtCore.Qt.Key_Backtab]:
+                event.ignore()
+                return
 
         if event.key() == QtCore.Qt.Key_Tab:
             tc = self.textCursor()
-            tc.insertText(" "*4)
-            return
+            if tc.hasSelection():
+                text = tc.selectedText()
+                lines = text.split("\u2029")
+                new_lines = ["    " + line for line in lines]
+                tc.insertText("\u2029".join(new_lines))
+                return
+            else:
+                tc.insertText("    ")
+                return
 
+        if event.key() == QtCore.Qt.Key_Backtab:
+            tc = self.textCursor()
+            if tc.hasSelection():
+                text = tc.selectedText()
+                lines = text.split("\u2029")
+                new_lines = []
+                for line in lines:
+                    if line.startswith("    "):
+                        new_lines.append(line[4:])
+                    elif line.startswith("\t"):
+                        new_lines.append(line[1:])
+                    else:
+                        new_lines.append(line)
+                tc.insertText("\u2029".join(new_lines))
+                return
+
+        if key in ["\"", "'", "(", "[", "{"]:
+            tc = self.textCursor()
+
+            if self.next_ignore == key:
+                self.next_ignore = None
+                tc.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.MoveAnchor)
+                self.setTextCursor(tc)
+                return
+
+            def accept(insert):
+                selected = tc.selectedText()
+                tc.insertText(key + selected + insert)
+                tc.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.MoveAnchor)
+                tc.setPosition(tc.position()-len(selected), QtGui.QTextCursor.MoveAnchor)
+                tc.setPosition(tc.position()+len(selected), QtGui.QTextCursor.KeepAnchor)
+                return tc
+
+            if key == "[":
+                self.next_ignore = "]"
+                return accept("]")
+
+            elif key == "{":
+                self.next_ignore = "}"
+                return accept("}")
+
+            elif key == "(":
+                self.next_ignore = ")"
+                return accept(")")
+
+            elif key == "\"":
+                if self.get_format() not in ["comment", "quotation"]:
+                    self.next_ignore = "\""
+                    return accept("\"")
+
+            elif key == "'":
+                if self.get_format() not in ["comment", "quotation"]:
+                    self.next_ignore = "'"
+                    return accept("'")
 
         if event.key() in [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Enter-1]:
             tc = self.textCursor()
@@ -385,41 +336,23 @@ class CustomTextEdit(QtWidgets.QTextEdit):
         tc = self.textCursor()
 
         if self.get_format() in ["comment", "quotation"]:
-            self.completer.hide()
             return
 
-        self.smart_under_selection(tc)
-        selected = tc.selectedText().split()
+        pos = tc.positionInBlock()
+        block = tc.block()
+        text = block.text()[:pos]
 
-        if not selected:
-            self.completer.hide()
+        if not text.strip():
             return
 
+        word = re.split(r"[\s\(\)\[\]{},;]", text)[-1]
 
-        if re.match(r'^[\w.]+$', selected[-1]) is None:
+        if len(word) >= 2:
+            rect = self.cursorRect()
+            pos = self.mapToGlobal(rect.bottomLeft())
+            self.completer.popup(pos, word)
+        else:
             self.completer.hide()
-            return
-
-
-        if selected: self.last_w = selected[-1]
-
-        try:
-            #Si no cumple con el mínimo de letras
-            if len(self.last_w) < self.completer.spell:
-                self.completer.hide()
-
-            else:
-                self.completer.popup(self.getPosPopup(), self.last_w)
-                #self.completer.show()
-
-        except UnicodeEncodeError:
-            return  #capturas tildes y caracteres especiales
-
-
-    #----------------------------------------------------------------------
-    def brace_match(self):
-
-        return
 
 
     #----------------------------------------------------------------------
@@ -427,22 +360,27 @@ class CustomTextEdit(QtWidgets.QTextEdit):
 
         contex_color = {"#7f0000": "quotation",
                         "#cc0000": "quotation",
+                        "#ce9178": "quotation",
                         "#007f00": "comment",
-                        "#c81818": "comment",}
+                        "#c81818": "comment",
+                        "#6a9955": "comment"}
 
         tc = self.textCursor()
         pos = tc.positionInBlock()
 
         block = tc.block()
         layout = block.layout()
-        formats = layout.additionalFormats()
+        formats = layout.formats()
 
         for format_ in formats:
             if pos >= format_.start and pos <= format_.start + format_.length:
                 return contex_color.get(format_.format.foreground().color().name().lower(), None)
 
 
+    #----------------------------------------------------------------------
+    def brace_match(self):
+        pass
 
-
-
-
+    #----------------------------------------------------------------------
+    def setAcceptRichText(self, accept=False):
+        pass

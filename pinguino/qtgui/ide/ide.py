@@ -239,26 +239,8 @@ class PinguinoIDE(QtWidgets.QMainWindow, PinguinoEvents, PythonShell, Log, Stdou
         }
         """)
 
-        #Log CSS styles
-        self.main.plainTextEdit_log.setStyleSheet("""
-        QPlainTextEdit {
-            background-color: #000;
-            color: #FFFFFF;
-            font-family: mono;
-            font-weight: normal;
-            font-size: 10pt;
-        }
-        """)
-
-        #StdOut CSS styles
-        self.main.plainTextEdit_stdout.setStyleSheet("""
-        QPlainTextEdit {
-            background-color: #FFFFFF;
-            font-family: mono;
-            font-weight: normal;
-            font-size: 10pt;
-        }
-        """)
+        # Update output panels and editor themes dynamically
+        self.update_editor_themes()
 
 
 if os.getenv("PINGUINO_MODE") == "NORMAL":
