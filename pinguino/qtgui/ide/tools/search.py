@@ -70,17 +70,14 @@ class Search(object):
         #for i in range(count): self.search_next()
 
         text_cur = editor.text_edit.textCursor()
-        editor.text_edit.moveCursor(text_cur.Start)
+        editor.text_edit.moveCursor(QtGui.QTextCursor.MoveOperation.Start)
         self.__search__(text_to_search)
-
-
 
     #----------------------------------------------------------------------
     @Decorator.requiere_open_files()
     @Decorator.requiere_line_edit_content("main.lineEdit_search")
     def __search__(self, text_to_search):
         if text_to_search == QtWidgets.QApplication.translate("Frame", "Search..."): return
-
 
         self.find_match(word=text_to_search,
                         back=False,
@@ -137,22 +134,27 @@ class Search(object):
         editor = self.get_current_editor()
         text_doc = editor.text_edit.document()
         text_cur = editor.text_edit.textCursor()
-        s = text_doc.FindCaseSensitively if sensitive else 0
-        w = text_doc.FindWholeWords if whole else 0
-        # editor.text_edit.moveCursor(text_cur.NoMove, text_cur.KeepAnchor)
+        
+        flags = QtGui.QTextDocument.FindFlag(0)
+        if sensitive:
+            flags |= QtGui.QTextDocument.FindFlag.FindCaseSensitively
+        if whole:
+            flags |= QtGui.QTextDocument.FindFlag.FindWholeWords
+
         text_cur.beginEditBlock()
-        editor.text_edit.moveCursor(text_cur.Start)
+        editor.text_edit.moveCursor(QtGui.QTextCursor.MoveOperation.Start)
         count = 0
         while True:
             result = False
-            if sensitive or whole: result = editor.text_edit.find(wordOld, s | w)
-            else: result = editor.text_edit.find(wordOld)
+            if sensitive or whole:
+                result = editor.text_edit.find(wordOld, flags)
+            else:
+                result = editor.text_edit.find(wordOld)
             if result:
                 tc = editor.text_edit.textCursor()
                 if tc.hasSelection(): tc.insertText(wordNew)
                 count += 1
             else: break
-            #replace = False
         text_cur.endEditBlock()
         self.main.label_replace_info.setText("{} words were replaced.".format(count))
 
@@ -161,12 +163,19 @@ class Search(object):
         editor = self.get_current_editor()
         text_doc = editor.text_edit.document()
         text_cur = editor.text_edit.textCursor()
-        b = text_doc.FindBackward if back else 0
-        s = text_doc.FindCaseSensitively if sensitive else 0
-        w = text_doc.FindWholeWords if whole else 0
-        # editor.text_edit.moveCursor(text_cur.NoMove, text_cur.KeepAnchor)
-        if back or sensitive or whole: editor.text_edit.find(word, b | s | w)
-        else:  editor.text_edit.find(word)
+        
+        flags = QtGui.QTextDocument.FindFlag(0)
+        if back:
+            flags |= QtGui.QTextDocument.FindFlag.FindBackward
+        if sensitive:
+            flags |= QtGui.QTextDocument.FindFlag.FindCaseSensitively
+        if whole:
+            flags |= QtGui.QTextDocument.FindFlag.FindWholeWords
+
+        if back or sensitive or whole:
+            editor.text_edit.find(word, flags)
+        else:
+            editor.text_edit.find(word)
         self.editor_highligh_line(line=None, color="#ffff7f", text_cursor=editor.text_edit.textCursor())
 
 
