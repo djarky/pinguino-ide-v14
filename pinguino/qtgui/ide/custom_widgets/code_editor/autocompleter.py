@@ -102,7 +102,7 @@ class PinguinoAutoCompleter(QListWidget):
     def show(self, *args):
         #self.set_arch_autocompleter()  #FIXME: move this call
         self.activateWindow()
-        super(PinguinoAutoCompleter, self).show(*args)
+        #super(PinguinoAutoCompleter, self).show(*args)
 
     #----------------------------------------------------------------------
     def focusOutEvent(self, event):
